@@ -1,0 +1,58 @@
+---
+title: "Problem4"
+output: html_document
+---
+
+data(diamonds)
+names(diamonds)
+### price vs. x
+```{r}
+ggplot(aes(x=price, y=x), data=diamonds) + geom_point() + geom_smooth(method='lm', color='red')
+```
+***
+
+### What are your observation about the scatterplot of price vs x?
+Notes:
+Price seems to be related to x
+***
+
+### Correlations price and x
+```{r}
+with(diamonds, cor.test(price, x))
+```
+
+***
+
+### Correlations price and y
+```{r}
+with(diamonds, cor.test(price, y))
+```
+
+***
+
+### Correlations price and z
+```{r}
+with(diamonds, cor.test(price, z))
+```
+
+***
+
+### price vs depth
+```{r}
+ggplot(aes(x=price, y=depth), data=diamonds) + geom_point()
+```
+
+### Adjustments - price vs. depth
+range(diamonds$depth)
+?scale_x_continuous
+```{r}
+ggplot(aes(x=depth, y=price), data=diamonds) + geom_point(alpha=1/100) + scale_x_continuous(breaks=c(43,79,2))
+```
+
+***
+
+### Correlations depth and price
+
+```{r}
+with(diamonds, cor.test(depth, price))
+```
