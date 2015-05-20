@@ -1,6 +1,9 @@
 Lesson 5
 ========================================================
-
+getwd()
+setwd("/Volumes/MacHD/Projects/P3-Data-Analysis-with-R")
+list.files()
+pf <- read.csv('pseudo_facebook.tsv', sep='\t')
 ### Multivariate Data
 Notes:
 
@@ -10,6 +13,15 @@ Notes:
 Notes:
 
 ***
+library(dplyr)
+pf.fc_by_age_gender <- pf %>%
+    filter(!is.na(gender)) %>%
+    group_by(age, gender) %>% 
+    summarise(mean_friend_count = mean(as.numeric(friend_count)), 
+              median_friend_count = median(as.numeric(friend_count)), 
+              n=n()) %>% 
+    ungroup() %>% 
+    arrange(age)
 
 ### Third Qualitative Variable
 Notes:
