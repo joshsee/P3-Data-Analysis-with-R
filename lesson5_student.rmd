@@ -1,7 +1,7 @@
 Lesson 5
 ========================================================
 getwd()
-setwd("/Volumes/MacHD/Projects/P3-Data-Analysis-with-R")
+setwd("C:\\Users\\Josh\\Documents\\GitHub\\P3-Data-Analysis-with-R")
 list.files()
 pf <- read.csv('pseudo_facebook.tsv', sep='\t')
 ### Multivariate Data
@@ -22,6 +22,8 @@ pf.fc_by_age_gender <- pf %>%
               n=n()) %>% 
     ungroup() %>% 
     arrange(age)
+head(pf.fc_by_age_gender)
+
 
 ### Third Qualitative Variable
 Notes:
@@ -37,7 +39,7 @@ ggplot(aes(x = gender, y = age),
 Notes:
 
 ```{r Plotting Conditional Summaries}
-
+ggplot(aes(x = age, y = median_friend_count), data = subset(pf.fc_by_age_gender, !is.na(gender))) + geom_line(aes(color=gender))
 ```
 
 ***
@@ -58,6 +60,12 @@ Notes:
 ```{r}
 install.packages('reshape2')
 library(reshape2)
+pf.fc_by_age_gender.wide <- dcast(pf.fc_by_age_gender, 
+                                  age ~ gender, 
+                                  value.var='median_friend_count')
+?dcast
+head(pf.fc_by_age_gender)
+head(pf.fc_by_age_gender.wide)
 ```
 
 
@@ -67,7 +75,8 @@ library(reshape2)
 Notes:
 
 ```{r Ratio Plot}
-
+library(ggplot2)
+ggplot(aes(x=age, y=female/male), data=pf.fc_by_age_gender.wide) + geom_line() + geom_hline(y=1)
 ```
 
 ***
@@ -76,7 +85,7 @@ Notes:
 Notes:
 
 ```{r Third Quantitative Variable}
-
+pf$year_joined <- floor(2014-pf$tenure/365)
 ```
 
 ***
@@ -85,7 +94,10 @@ Notes:
 Notes:
 
 ```{r Cut a Variable}
-
+summary(pf$year_joined)
+table(pf$year_joined)
+pf$year_joined.bucket<-cut(pf$year_joined, c(2004,2009,2011,2012, 2014))
+pf$year_joined.bucker=NULL
 ```
 
 ***
