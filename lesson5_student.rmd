@@ -1,7 +1,8 @@
 Lesson 5
 ========================================================
 getwd()
-setwd("C:\\Users\\Josh\\Documents\\GitHub\\P3-Data-Analysis-with-R")
+#setwd("C:\\Users\\Josh\\Documents\\GitHub\\P3-Data-Analysis-with-R")
+setwd('/Volumes/MacHD/Projects/P3-Data-Analysis-with-R')
 list.files()
 pf <- read.csv('pseudo_facebook.tsv', sep='\t')
 ### Multivariate Data
@@ -106,7 +107,9 @@ pf$year_joined.bucker=NULL
 Notes:
 
 ```{r Plotting it All Together}
-
+ggplot(aes(x = age, y = friend_count), 
+              data = subset(pf, !is.na(year_joined.bucket))) + 
+  geom_line(aes(color = year_joined.bucket), stat = 'summary', fun.y = median)
 ```
 
 ***
@@ -115,7 +118,9 @@ Notes:
 Notes:
 
 ```{r Plot the Grand Mean}
-
+ggplot(aes(x = age, y = friend_count), 
+              data = subset(pf, !is.na(year_joined.bucket))) + 
+  geom_line(aes(color = year_joined.bucket), stat = 'summary', fun.y = mean) + geom_line(stat = 'summary', fun.y = mean, linetype=2)
 ```
 
 ***
@@ -124,9 +129,9 @@ Notes:
 Notes:
 
 ```{r Friending Rate}
-
+with(subset(pf, tenure>=1), summary(friend_count/tenure))
 ```
-
+table(subset(pf, tenure>=1))
 ***
 
 ### Friendships Initiated
@@ -182,14 +187,16 @@ Notes:
 
 ### Introducing the Yogurt Data Set
 Notes:
-
+yo <- read.csv('yogurt.csv')
+str(yo)
+yo$id <- factor(yo$id)
 ***
 
 ### Histograms Revisited
 Notes:
 
 ```{r Histograms Revisited}
-
+ggplot(yo, aes(x=price)) + geom_histogram(bin=10)
 ```
 
 ***
@@ -198,7 +205,8 @@ Notes:
 Notes:
 
 ```{r Number of Purchases}
-
+?transform
+yo <- transform(yo, all.purchases=strawberry+blueberry+pina.colada+plain+mixed.berry)
 ```
 
 ***
@@ -207,7 +215,7 @@ Notes:
 Notes:
 
 ```{r Prices over Time}
-
+ggplot(aes(x=time,y=price), data=yo) + geom_point()
 ```
 
 ***

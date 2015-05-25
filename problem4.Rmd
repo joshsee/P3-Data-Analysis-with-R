@@ -2,7 +2,7 @@
 title: "Problem4"
 output: html_document
 ---
-
+library(ggplot2)
 data(diamonds)
 names(diamonds)
 ### price vs. x
@@ -46,7 +46,7 @@ ggplot(aes(x=price, y=depth), data=diamonds) + geom_point()
 range(diamonds$depth)
 ?scale_x_continuous
 ```{r}
-ggplot(aes(x=depth, y=price), data=diamonds) + geom_point(alpha=1/100) + scale_x_continuous(breaks=c(43,79,2))
+ggplot(aes(x=depth, y=price), data=diamonds) + geom_point(alpha=1/100) + scale_x_continuous(breaks=seq(43,79,2))
 ```
 
 ***
@@ -56,3 +56,75 @@ ggplot(aes(x=depth, y=price), data=diamonds) + geom_point(alpha=1/100) + scale_x
 ```{r}
 with(diamonds, cor.test(depth, price))
 ```
+
+***
+
+### price vs carat
+```{r}
+ggplot(aes(x=carat, y=price), data=diamonds) + geom_point() + 
+  xlim(0, quantile(diamonds$carat, 0.99)) + 
+  ylim(0, quantile(diamonds$price, 0.99))
+```
+
+***
+
+### price vs. volume
+```{r}
+diamonds$volume <- diamonds$x * diamonds$y * diamonds$z 
+head(diamonds, 20)
+ggplot(aes(x=diamonds$volume, y=price), data=diamonds) + geom_point()
+```
+***
+
+### Findings - price vs. volume
+
+```{r}
+library('dplyr')
+library('plyr')
+detach('package:plyr', unload=TRUE)
+count(diamonds$volume == 0)
+```
+
+***
+
+### Correlations on Subsets
+
+```{r}
+with(subset(diamonds, volume>0&volume<800), cor.test(price, volume))
+clean_diamonds <- subset(diamonds, volume>0&volume<800)
+```
+
+***
+
+### Adjustments - price vs. volume
+```{r}
+ggplot(aes(x=clean_diamonds$volume, y=price), data=clean_diamonds) + geom_point(alpha=1/10) + geom_smooth(method='lm', color='red')
+```
+
+***
+
+### Mean Price by Clarity
+```{r}
+detach("package:plyr", unload=TRUE)
+diamonds.diamondsByClarity <- diamonds %>% group_by(clarity) %>% summarize( 
+                          mean_price = mean(as.numeric(price)),
+                          median_price = median(as.numeric(price)),
+                          min_price = min(as.numeric(price)),
+                          max_price = max(as.numeric(price)),
+                          n = n()) %>% arrange(clarity)
+head(diamonds.diamondsByClarity, 20)
+```
+
+***
+
+### Bar Charts of Mean Price
+
+```{r}
+diamonds_by_clarity <- group_by(diamonds, clarity)
+diamonds_mp_by_clarity <- summarise(diamonds_by_clarity, mean_price = mean(price))
+
+diamonds_by_color <- group_by(diamonds, color)
+diamonds_mp_by_color <- summarise(diamonds_by_color, mean_price = mean(price))
+```
+
+***
