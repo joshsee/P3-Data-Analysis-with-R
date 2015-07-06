@@ -3,13 +3,17 @@ White Wine Quality Exploration by Josh See
 
 ```{r echo=FALSE, message=FALSE, warning=FALSE, packages}
 library(ggplot2)
+library(dplyr)
 ```
 
 ### Load the Data
 
 ```{r echo=FALSE, Load_the_Data}
 # Load the Data
+setwd("C:\\Users\\Josh\\Documents\\GitHub\\P3-Data-Analysis-with-R")
 wines <- read.csv('wineQualityWhites.csv')
+# Selecting only col 2 to col 13, excluding the first col (Line no.)
+modifiedwines <- wines[,c(2:13)]
 ```
 
 ```{r echo=FALSE}
@@ -23,4 +27,18 @@ str(wines)
 
 The lowest and highest quality score given is 3 and 9, with a mean of 5.878
 
-All the attribute provided is numerical values except quality which is a integer.
+All the attribute provided is decimal values except quality which is a integer.
+
+
+ggplot(aes(x=factor(quality)), data = wines) + geom_histogram()
+
+ggplot(aes(x=fixed.acidity), data=wines) + geom_histogram(binwidth=0.2)
+ggplot(aes(x=volatile.acidity), data=wines) + geom_histogram(binwidth=0.02)
+ggplot(aes(x=citric.acid), data=wines) + geom_histogram(binwidth=0.02)
+ggplot(aes(x=residual.sugar), data=wines) + geom_histogram(binwidth=0.2)
+ggplot(aes(x=chlorides), data=wines) + geom_histogram(binwidth=0.01)
+
+ggplot(aes(x=alcohol), data=wines) + geom_bar(binwidth=0.1) + scale_x_continuous(limits = c(8,15), breaks = seq(8,15,1))
+summary(wines$alcohol)
+
+summary(wines$citric.acid)
