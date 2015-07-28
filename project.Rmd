@@ -10,10 +10,11 @@ library(dplyr)
 
 ```{r echo=FALSE, Load_the_Data}
 # Load the Data
-setwd("C:\\Users\\Josh\\Documents\\GitHub\\P3-Data-Analysis-with-R")
+# setwd("C:\\Users\\Josh\\Documents\\GitHub\\P3-Data-Analysis-with-R")
+setwd('/Volumes/MacHD/Projects/P3-Data-Analysis-with-R')
 wines <- read.csv('wineQualityWhites.csv')
 # Selecting only col 2 to col 13, excluding the first col (Line no.)
-modifiedwines <- wines[,c(2:13)]
+wines <- wines[,c(2:13)]
 ```
 
 ```{r echo=FALSE}
@@ -23,12 +24,22 @@ names(wines)
 str(wines)
 ```
 
+# Univariate Plots Section
+
 ## Summary
+We already know that the quality of the wine is rated by wine experts from the scale of 0 (very bad) to 10 (very excellent)
 
-The lowest and highest quality score given is 3 and 9, with a mean of 5.878
+-> The lowest and highest quality score given is 3 and 9, with a mean of 5.878
 
-All the attribute provided is decimal values except quality which is a integer.
+-> All the attribute provided is decimal values except quality which is a integer.
 
+
+
+```{r echo=FALSE}
+# 
+wines$quality <- factor(wines$quality)
+levels(wines$quality)
+```
 
 ggplot(aes(x=factor(quality)), data = wines) + geom_histogram()
 
