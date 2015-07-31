@@ -4,6 +4,7 @@ White Wine Quality Exploration by Josh See
 ```{r echo=FALSE, message=FALSE, warning=FALSE, packages}
 library(ggplot2)
 library(dplyr)
+library(gridExtra)
 ```
 
 ### Load the Data
@@ -35,8 +36,7 @@ All the attribute provided is decimal values except quality which is a integer.
 
 ## Lets explore each individual variables first
 
-### Quality
-
+### quality
 ```{r echo=FALSE}
 ggplot(aes(x = quality), data = wines) + geom_histogram(binwidth = 1)   
 ```
@@ -44,14 +44,71 @@ ggplot(aes(x = quality), data = wines) + geom_histogram(binwidth = 1)
 ```{r echo=FALSE}
 # Since wine is just an integer, change that to a categorical variables
 wines$quality <- factor(wines$quality)
+summary(wines$quality)
 ```
 
-### Fixed acidity
-
+### fixed.acidity
 ```{r echo=FALSE}
 ggplot(aes(x = fixed.acidity), data = wines) + geom_histogram(binwidth = .2)
 ```
 
+### volatile.acidity
+```{r echo=FALSE}
+
+```
+
+### citric.acid
+```{r echo=FALSE}
+ggplot(aes(x = citric.acid), data = wines) + geom_histogram(binwidth = 0.05)
+```
+
+### residual.sugar
+```{r echo=FALSE}
+ggplot(aes(x = residual.sugar), data = wines) + geom_histogram(binwidth = 0.2)
+```
+
+### chlorides
+```{r echo=FALSE}
+
+```
+
+### free.sulfur.dioxide
+```{r echo=FALSE}
+
+```
+
+### total.sulfur.dioxide
+```{r echo=FALSE}
+
+```
+
+### pH
+```{r echo=FALSE}
+ggplot(aes(x = pH), data = wines) + geom_histogram(binwidth = 0.02)
+```
+
+### sulphates
+```{r echo=FALSE}
+ggplot(aes(x = sulphates), data = wines) + geom_histogram(binwidth = 0.02)
+```
+
+### density
+```{r echo=FALSE}
+table(wines$density)
+ggplot(aes(x = density), data = wines) + geom_histogram(binwidth = 0.0005) + coord_cartesian(xlim=c(0.98,1.01))+ scale_x_continuous(breaks=seq(0.98,1.01,.005))
+
+summary(wines$density)
+```
+
+### alcohol
+```{r echo=FALSE}
+ggplot(aes(x=alcohol), data = wines) +
+  geom_bar(binwidth = 0.2) +
+  xlab("Alcohol (% by volume)") +
+  ylab("Occurence") +
+  scale_x_continuous(limits = c(8,15), breaks = seq(8,15,1)) +
+  ggtitle("Histogram for Alcohol \n")
+```
 
 
 # Univariate Analysis
