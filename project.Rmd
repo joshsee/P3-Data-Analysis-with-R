@@ -2,140 +2,316 @@ White Wine Quality Exploration by Josh See
 ========================================================
 
 ```{r echo=FALSE, message=FALSE, warning=FALSE, packages}
+# Load all of the packages that you end up using
+# in your analysis in this code chunk.
+
+# Notice that the parameter "echo" was set to FALSE for this code chunk.
+# This prevents the code from displaying in the knitted HTML output.
+# You should set echo=FALSE for all code chunks in your file.
+
 library(ggplot2)
 library(dplyr)
 library(gridExtra)
 ```
 
-### Load the Data
+### Introduction
+The goal of this project is to explore the chemical properties found in a tidy data set of white wines and to understand and summarize which properties is closely related to the wine quality.
 
-```{r echo=FALSE, Load_the_Data}
+### Load the Data
+```{r echo=FALSE, message=FALSE, warning=FALSE, Load_the_Data}
 # Load the Data
-setwd("C:\\Users\\Josh\\Documents\\GitHub\\P3-Data-Analysis-with-R")
-#setwd('/Volumes/MacHD/Projects/P3-Data-Analysis-with-R')
+#setwd("C:\\Users\\Josh\\Documents\\GitHub\\P3-Data-Analysis-with-R")
+setwd('/Volumes/MacHD/Projects/P3-Data-Analysis-with-R')
 wines <- read.csv('wineQualityWhites.csv')
+```
+
+### Data summary 
+```{r echo=FALSE, message=FALSE, warning=FALSE, Data_summary}
+# Data Summary
+summary(wines)
+```
+
+### Data dimensions
+```{r echo=FALSE, message=FALSE, warning=FALSE, Data_dimensions}
+# Data Dimensions
+dim(wines)
+```
+
+### Feature names
+```{r echo=FALSE, message=FALSE, warning=FALSE, Feature_names}
+# Feature Names
+names(wines)
+```
+
+### Data Structure
+```{r echo=FALSE, message=FALSE, warning=FALSE, Data_structure}
+str(wines)
+```
+
+I find out that the first col X is a unique index variable for each individual observation. I think not very useful to the analysis so its best to remove it before procceding to the next step.
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
 # Selecting only col 2 to col 13, excluding the first col (Line no.)
 wines <- wines[,c(2:13)]
 ```
 
-```{r echo=FALSE}
-dim(wines)
-summary(wines)
-names(wines)
-str(wines)
-```
-
 # Univariate Plots Section
 
-## Observation and summary
+### Observation
 We already know that the quality of the wine is rated by wine experts from the scale of 0 (very bad) to 10 (very excellent)
 
 The lowest and highest quality score given is 3 and 9, with a mean of 5.878
 
 All the attribute provided is decimal values except quality which is a integer.
 
-## Lets explore each individual variables first
+Attributes like fixed.acidity, volatile.acidity, citric.acid, residual.sugar, chlorides, free.sulfur.dioxide, total.sulfur.dioxide, sulphates have max value that is greater than 75% quantile.
 
-### quality
-```{r echo=FALSE}
-ggplot(aes(x = quality), data = wines) + geom_histogram(binwidth = 1)   
-```
+Lets take a look at each properties to get a sense of data distribution.
 
-```{r echo=FALSE}
-# Since wine is just an integer, change that to a categorical variables
+### Quality
+```{r echo=FALSE, message=FALSE, warning=FALSE, Quality}
+# Since wine is just an integer, we can change that to a categorical variables
 wines$quality <- factor(wines$quality)
+wines$quality_numeric <- as.numeric(wines$quality)
+```
+
+#### Levels attributes of wine quality
+```{r echo=FALSE, message=FALSE, warning=FALSE, Levels_attributes_of_wine_quality}
+levels(wines$quality)
+```
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
 summary(wines$quality)
+
+qplot(x=quality, data = wines, binwidth=1, 
+      xlab='Quality', 
+      ylab='Count',
+      color=I('black'), fill=I('#F79420'))
 ```
 
-### fixed.acidity
-```{r echo=FALSE}
-ggplot(aes(x = fixed.acidity), data = wines) + geom_histogram(binwidth = .2)
+I factor the wine quality from an integer variable to a categorical varible as its kind of arbitary and can be represented by another form of values not just integer. The histogram shows the shape of normal distribution. Most of the wine are rated with a quality score of 6 and with a range of 3 to 9.
+
+### Fixed.acidity
+```{r echo=FALSE, message=FALSE, warning=FALSE, fixed_acidity}
+table(wines$fixed.acidity)
+summary(wines$fixed.acidity)
+# Box plot to visualize the outlier
+qplot(y=fixed.acidity,  x = factor(0), data=wines, geom='boxplot')
+
+qplot(x=fixed.acidity, data=wines, binwidth=.2, 
+      xlab='Fixed Acidity', 
+      ylab='Count',
+      color=I('black'), fill=I('#F79420')) +
+  scale_x_continuous(lim=c(4, 11))
 ```
 
-### volatile.acidity
-```{r echo=FALSE}
+There seems be a right tail when the histogram was initially chartted. Once the outlier which is a value 11.8 and 14.2 is removed, the histogram show a normal distribution.
 
+### Volatile.acidity
+```{r echo=FALSE, message=FALSE, warning=FALSE, volative_acidity}
+summary(wines$volatile.acidity)
+
+summary(log10(wines$volatile.acidit))
+
+qplot(x=log10(volatile.acidity), data=wines, binwidth=.03,
+      xlab='Volatile Acidity', 
+      ylab='Count',
+      color=I('black'), fill=I('#F79420')) 
 ```
 
-### citric.acid
-```{r echo=FALSE}
+By transforming the variable using a log based 10, we able to remove the right tail and turn it into a normal distribution.
+
+### Citric.acid
+```{r echo=FALSE, message=FALSE, warning=FALSE, citric_acid}
+summary(wines$citric.acid)
+# Box plot to visualize the outlier
+qplot(y=citric.acid,  x=factor(0), data=wines, geom='boxplot')
+
+qplot(x=citric.acid, data=wines,
+      xlab='Citric Acidity', 
+      ylab='Count',
+      color=I('black'), fill=I('#F79420')) +
+  scale_x_continuous(lim=c(0, 1))
+
 ggplot(aes(x = citric.acid), data = wines) + geom_histogram(binwidth = 0.05)
 ```
 
-### residual.sugar
-```{r echo=FALSE}
-ggplot(aes(x = residual.sugar), data = wines) + geom_histogram(binwidth = 0.2)
+Using a box plot, we can cleary visualize the outlier which may cause the histogram to have a long right tail. Once we removed that, our histogram shows a normal distribution.
+
+### Residual.sugar
+```{r echo=FALSE, message=FALSE, warning=FALSE, residual_sugar}
+summary(wines$volatile.acidity)
+
+summary(log10(wines$volatile.acidit))
+
+qplot(y=residual.sugar,  x=factor(0), data=wines, geom='boxplot')
+
+# Removing outlier on the right tail
+qplot(x=residual.sugar, data = wines,
+      xlab='Residual Sugar', 
+      ylab='Count',
+      color=I('black'), fill=I('#F79420')) +
+  scale_x_continuous(lim=c(0, 40))
+
+# Transform the variable
+qplot(x=log10(residual.sugar), data = wines,
+      xlab='Residual Sugar', 
+      ylab='Count',
+      color=I('black'), fill=I('#F79420'))
 ```
+
+I try to remove the outlier after looking at the boxplot. The histogram seems to show a positive skewed graph. However, after applying a log based 10 transformation. This histogram still does not appear to be a normal distribution. It looks more like a bi-model distribution.
 
 ### chlorides
-```{r echo=FALSE}
+```{r echo=FALSE, message=FALSE, warning=FALSE, chlorides}
+summary(log10(wines$chlorides))
+
+qplot(x=log10(wines$chlorides), data=wines,
+      xlab='Chlorides', 
+      ylab='Count',
+      color=I('black'), fill=I('#F79420'))
 
 ```
+
+Chlorides shows a normal distribution once a log based 10 transformation is applied.
 
 ### free.sulfur.dioxide
-```{r echo=FALSE}
+```{r echo=FALSE, message=FALSE, warning=FALSE, free_sulfur_dioxide}
+summary(wines$free.sulfur.dioxide)
 
+qplot(y=free.sulfur.dioxide,  x=factor(0), data=wines, geom='boxplot')
+
+qplot(x=free.sulfur.dioxide, data=wines, binwidth=2,
+      xlab='Free Sulfur Dioxide', 
+      ylab='Count',
+      color=I('black'), fill=I('#F79420')) +
+  scale_x_continuous(lim=c(0, 90))
 ```
+
+Once outlier is removed, the histogram appears as a normal distribution.
 
 ### total.sulfur.dioxide
-```{r echo=FALSE}
+```{r echo=FALSE, message=FALSE, warning=FALSE, total_sulfur_dioxide}
+summary(wines$total.sulfur.dioxide)
 
+qplot(y=total.sulfur.dioxide,  x=factor(0), data=wines, geom='boxplot')
+
+qplot(x = total.sulfur.dioxide, data = wines, , binwidth=5, 
+      xlab='Total Sulfur Dioxide', 
+      ylab='Count',
+      color=I('black'), fill=I('#F79420')) +
+  scale_x_continuous(lim = c(0, 300))
 ```
+
+Same for total.sulfur.dioxide once right tail outlier is removed, the histogram appears as a normal distribution.
 
 ### pH
-```{r echo=FALSE}
-ggplot(aes(x = pH), data = wines) + geom_histogram(binwidth = 0.02)
+```{r echo=FALSE, message=FALSE, warning=FALSE, ph}
+summary(wines$pH)
+
+qplot(x = pH, data=wines, binwidth = .05,
+      xlab='pH', 
+      ylab='Count',
+      color=I('black'), fill=I('#F79420'))
 ```
+
+pH seems to give a normal distribution once histogram is graphed. There is no transformation that needs to be applied to it.
 
 ### sulphates
 ```{r echo=FALSE}
-ggplot(aes(x = sulphates), data = wines) + geom_histogram(binwidth = 0.02)
+summary(wines$sulphates)
+
+qplot(y=sulphates,  x=factor(0), data=wines, geom='boxplot')
+
+p1<-qplot(x = sulphates, data=wines, binwidth = .01,
+      xlab='Sulphates', 
+      ylab='Count',
+      color=I('black'), fill=I('#F79420')) +
+  scale_x_continuous(lim = c(0.3, 0.7))
+
+summary(log10(wines$sulphates))
+
+p2<-qplot(x = log10(sulphates), data=wines, binwidth = .02,
+      xlab='Sulphates', 
+      ylab='Count',
+      color=I('black'), fill=I('#F79420'))
+
+grid.arrange(p1,p2,ncol=1)
 ```
+
+Applying log based 10 transformation gives us a normal distribution.
 
 ### density
 ```{r echo=FALSE}
-table(wines$density)
-ggplot(aes(x = density), data = wines) + geom_histogram(binwidth = 0.0005) + coord_cartesian(xlim=c(0.98,1.01))+ scale_x_continuous(breaks=seq(0.98,1.01,.005))
-
 summary(wines$density)
+
+qplot(y=density,  x=factor(0), data=wines, geom='boxplot')
+
+qplot(x = density, data=wines, binwidth=.0005,
+      xlab='Density', 
+      ylab='Count',
+      color=I('black'), fill=I('#F79420')) +
+  scale_x_continuous(limits = c(0.98, 1.01), breaks=seq(0.98, 1.01, .005))
+  
 ```
+
+The desity histogram shows a normal distribution once the outlier is removed.
 
 ### alcohol
 ```{r echo=FALSE}
-ggplot(aes(x=alcohol), data = wines) +
-  geom_bar(binwidth = 0.2) +
-  xlab("Alcohol (% by volume)") +
-  ylab("Occurence") +
-  scale_x_continuous(limits = c(8,15), breaks = seq(8,15,1)) +
-  ggtitle("Histogram for Alcohol \n")
+summary(wines$alcohol)
+
+qplot(y=alcohol,  x=factor(0), data=wines, geom='boxplot')
+
+qplot(x = alcohol, data=wines, binwidth=.2, 
+      xlab='Alcohol', 
+      ylab='Count',
+      color=I('black'), fill=I('#F79420')) +
+  scale_x_continuous(limits = c(8, 14.20), breaks=seq(8, 14.20, 1))
 ```
 
+This histogram shows a slight positive skewed distribution with a peak between 9 and 10.
 
 # Univariate Analysis
 
 ### What is the structure of your dataset?
 
-There are 4,898 observations and 13 variables in the dataset. First variable is basically an index of each observation. I removed it as its useless for the analysis. The last variable which is an integer quality score and the rest of the variables are stored as numerical data types. The quality score is rated by wine experts from the scale of 0 (very bad) to 10 (very excellent). The quality score is converted to a factor data types. Most of the wines have a quality score of 6, the lowest and highest score given is 3 and and 9.
+There are 4,898 observations and 13 variables in the dataset. First variable X is basically an index of each observations. It is being removed as its useless for the analysis. The rest of the variables which is stored as numerical data type is basically the properties of white wine. Last variable is an integer quality score which is rated by wine experts from the scale of 0 (very bad) to 10 (very excellent). The quality score is converted to a factor data types. Most of the wines have a quality score of 6, the lowest and highest score given is 3 and and 9.
 
 ### What is/are the main feature(s) of interest in your dataset?
 
-
+The main feature that is important to this analysis is the wine quality. Analysis needs to be done on the wine properties to see whether it has an impact to this outcome.
 
 ### What other features in the dataset do you think will help support your investigation into your feature(s) of interest?
+
+wines$quality <- as.numeric(wines$quality)
+cor(wines$fixed.acidity, wines$quality_numeric)
+cor(wines$volatile.acidity, wines$quality_numeric)    
+cor(wines$citric.acid, wines$quality_numeric)    
+cor(wines$residual.sugar, wines$quality_numeric)       
+cor(wines$chlorides, wines$quality_numeric)           
+cor(wines$free.sulfur.dioxide, wines$quality_numeric)  
+cor(wines$total.sulfur.dioxide, wines$quality_numeric) 
+cor(wines$density, wines$quality_numeric)             
+cor(wines$pH, wines$quality_numeric)                   
+cor(wines$sulphates, wines$quality_numeric)            
+cor(wines$alcohol, wines$quality_numeric)
 
 ### Did you create any new variables from existing variables in the dataset?
 
 ### Of the features you investigated, were there any unusual distributions? Did you perform any operations on the data to tidy, adjust, or change the form of the data? If so, why did you do this?
 
-ggplot(aes(x=factor(quality)), data = wines) + geom_histogram()
 
-ggplot(aes(x=fixed.acidity), data=wines) + geom_histogram(binwidth=0.2)
-ggplot(aes(x=volatile.acidity), data=wines) + geom_histogram(binwidth=0.02)
-ggplot(aes(x=citric.acid), data=wines) + geom_histogram(binwidth=0.02)
-ggplot(aes(x=residual.sugar), data=wines) + geom_histogram(binwidth=0.2)
-ggplot(aes(x=chlorides), data=wines) + geom_histogram(binwidth=0.01)
 
-ggplot(aes(x=alcohol), data=wines) + geom_bar(binwidth=0.1) + scale_x_continuous(limits = c(8,15), breaks = seq(8,15,1))
-summary(wines$alcohol)
+# Bivariate Plots Section
+```{r echo=FALSE, Bivariate_Plots}
 
-summary(wines$citric.acid)
+```
+
+# Bivariate Analysis
+
+### Talk about some of the relationships you observed in this part of the investigation. How did the feature(s) of interest vary with other features in the dataset?
+
+### Did you observe any interesting relationships between the other features (not the main feature(s) of interest)?
+
+### What was the strongest relationship you found?
