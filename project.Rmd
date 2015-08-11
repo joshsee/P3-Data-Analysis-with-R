@@ -12,6 +12,7 @@ White Wine Quality Exploration by Josh See
 library(ggplot2)
 library(dplyr)
 library(gridExtra)
+library(GGally)
 ```
 
 ### Introduction
@@ -234,7 +235,7 @@ summary(log10(wines$sulphates))
 p2<-qplot(x = log10(sulphates), data=wines, binwidth = .02,
       xlab='Sulphates', 
       ylab='Count',
-      color=I('black'), fill=I('#F79420'))
+      color=I('black'), fill=I('#F79420')) +
 
 grid.arrange(p1,p2,ncol=1)
 ```
@@ -284,29 +285,36 @@ The main feature that is important to this analysis is the wine quality. Analysi
 
 ### What other features in the dataset do you think will help support your investigation into your feature(s) of interest?
 
-wines$quality <- as.numeric(wines$quality)
-cor(wines$fixed.acidity, wines$quality_numeric)
-cor(wines$volatile.acidity, wines$quality_numeric)    
-cor(wines$citric.acid, wines$quality_numeric)    
-cor(wines$residual.sugar, wines$quality_numeric)       
-cor(wines$chlorides, wines$quality_numeric)           
-cor(wines$free.sulfur.dioxide, wines$quality_numeric)  
-cor(wines$total.sulfur.dioxide, wines$quality_numeric) 
-cor(wines$density, wines$quality_numeric)             
-cor(wines$pH, wines$quality_numeric)                   
-cor(wines$sulphates, wines$quality_numeric)            
-cor(wines$alcohol, wines$quality_numeric)
+
 
 ### Did you create any new variables from existing variables in the dataset?
 
+Nope, I did not create any additional variables.
+
 ### Of the features you investigated, were there any unusual distributions? Did you perform any operations on the data to tidy, adjust, or change the form of the data? If so, why did you do this?
 
-
+I created a few histograms to understand the distribution of the features and box plots to find out the outliers. Yes, there were a few outliers in the features in which I removed to get it to look gaussian or normal distribution. I also applied a log based 10 transformation on the features which had long tails so that the features becomes gaussian. Quality and ph were the features which I did not apply any transformations as they look like normal distribution. Alcohol feature looks like a positive skewed distribution.
 
 # Bivariate Plots Section
 ```{r echo=FALSE, Bivariate_Plots}
 
 ```
+
+wines$quality_numeric <- as.numeric(wines$quality)
+cor.test(wines$fixed.acidity, wines$quality_numeric, method='pearson')
+
+cor.test(subset(wines, 4 <= fixed.acidity & fixed.acidity <= 12), quality, method = 'p'))
+
+cor.test(wines$volatile.acidity, wines$quality_numeric, method='pearson')    
+cor.test(wines$citric.acid, wines$quality_numeric, method='pearson')    
+cor.test(wines$residual.sugar, wines$quality_numeric, method='pearson')
+cor.test(wines$chlorides, wines$quality_numeric, method='pearson')           
+cor.test(wines$free.sulfur.dioxide, wines$quality_numeric, method='pearson')  
+cor.test(wines$total.sulfur.dioxide, wines$quality_numeric, method='pearson') 
+cor.test(wines$density, wines$quality_numeric, method='pearson')             
+cor.test(wines$pH, wines$quality_numeric, method='pearson')                   
+cor.test(wines$sulphates, wines$quality_numeric, method='pearson')            
+cor.test(wines$alcohol, wines$quality_numeric, method='pearson')
 
 # Bivariate Analysis
 
@@ -315,3 +323,4 @@ cor(wines$alcohol, wines$quality_numeric)
 ### Did you observe any interesting relationships between the other features (not the main feature(s) of interest)?
 
 ### What was the strongest relationship you found?
+
