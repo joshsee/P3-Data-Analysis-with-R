@@ -14,7 +14,7 @@ library(dplyr)
 library(gridExtra)
 library(GGally)
 ```
-
+ 
 ### Introduction
 The goal of this project is to explore the chemical properties found in a tidy data set of white wines and to understand and summarize which properties is closely related to the wine quality.
 
@@ -301,20 +301,53 @@ I created a few histograms to understand the distribution of the features and bo
 ```
 
 wines$quality_numeric <- as.numeric(wines$quality)
-cor.test(wines$fixed.acidity, wines$quality_numeric, method='pearson')
 
-cor.test(subset(wines, 4 <= fixed.acidity & fixed.acidity <= 12), quality, method = 'p'))
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+# fixed.acidity
+with(subset(wines, fixed.acidity>=4 & fixed.acidity<=11), cor.test(fixed.acidity, quality, method = 'pearson'))
+# -0.110
 
-cor.test(wines$volatile.acidity, wines$quality_numeric, method='pearson')    
-cor.test(wines$citric.acid, wines$quality_numeric, method='pearson')    
-cor.test(wines$residual.sugar, wines$quality_numeric, method='pearson')
-cor.test(wines$chlorides, wines$quality_numeric, method='pearson')           
-cor.test(wines$free.sulfur.dioxide, wines$quality_numeric, method='pearson')  
-cor.test(wines$total.sulfur.dioxide, wines$quality_numeric, method='pearson') 
-cor.test(wines$density, wines$quality_numeric, method='pearson')             
-cor.test(wines$pH, wines$quality_numeric, method='pearson')                   
-cor.test(wines$sulphates, wines$quality_numeric, method='pearson')            
-cor.test(wines$alcohol, wines$quality_numeric, method='pearson')
+# volatile.acidity
+cor.test(log10(wines$volatile.acidity), wines$quality, method='pearson')    
+# -0.197
+
+# citric.acid
+with(subset(wines, citric.acid>=0 & citric.acid<=1), cor.test(citric.acid, quality_numeric, method='pearson'))
+# -0.001
+
+# residual.sugar
+cor.test(log10(wines$residual.sugar), wines$quality, method='pearson')
+# -0.065
+
+# chlorides
+cor.test(log10(wines$chlorides), wines$quality, method='pearson')           
+# -0.272
+
+#Free.sulfur.dioxide
+with(subset(wines, free.sulfur.dioxide>=0 & free.sulfur.dioxide<=90), cor.test(free.sulfur.dioxide, quality, method='pearson'))
+# 0.031
+
+# Total.sulfur.dioxide
+with(subset(wines, total.sulfur.dioxide>=0 & total.sulfur.dioxide<=30), cor.test(total.sulfur.dioxide, quality, method='pearson'))
+# 0.160
+
+# Density
+with(subset(wines, density>=0.98 & density<=1.01), cor.test(density, quality, method='pearson'))
+# -0.317
+
+# PH
+cor.test(wines$pH, wines$quality, method='pearson')
+# 0.099
+
+# Sulphates
+cor.test(log10(wines$sulphates), wines$quality, method='pearson')
+# 0.037
+
+# Alcohol
+with(subset(wines, alcohol>=8 & alcohol<=14.20), cor.test(alcohol, quality, method='pearson')) 
+# 0.436
+
+```
 
 # Bivariate Analysis
 
@@ -323,4 +356,51 @@ cor.test(wines$alcohol, wines$quality_numeric, method='pearson')
 ### Did you observe any interesting relationships between the other features (not the main feature(s) of interest)?
 
 ### What was the strongest relationship you found?
+
+
+# Multivariate Plots Section
+
+```{r echo=FALSE, Multivariate_Plots}
+
+```
+
+# Multivariate Analysis
+
+### Talk about some of the relationships you observed in this part of the investigation. Were there features that strengthened each other in terms of looking at your feature(s) of interest?
+
+### Were there any interesting or surprising interactions between features?
+
+### OPTIONAL: Did you create any models with your dataset? Discuss the strengths and limitations of your model.
+
+------
+
+# Final Plots and Summary
+
+### Plot One
+```{r echo=FALSE, Plot_One}
+
+```
+
+### Description One
+
+
+### Plot Two
+```{r echo=FALSE, Plot_Two}
+
+```
+
+### Description Two
+
+
+### Plot Three
+```{r echo=FALSE, Plot_Three}
+
+```
+
+### Description Three
+
+------
+
+# Reflection
+
 
