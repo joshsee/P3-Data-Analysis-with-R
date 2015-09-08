@@ -21,8 +21,8 @@ The goal of this project is to explore the chemical properties found in a tidy d
 ### Load the Data
 ```{r echo=FALSE, message=FALSE, warning=FALSE, Load_the_Data}
 # Load the Data
-#setwd("C:\\Users\\Josh\\Documents\\GitHub\\P3-Data-Analysis-with-R")
-setwd('/Volumes/MacHD/Projects/P3-Data-Analysis-with-R')
+setwd("C:\\Users\\Josh\\Documents\\GitHub\\P3-Data-Analysis-with-R")
+#setwd('/Volumes/MacHD/Projects/P3-Data-Analysis-with-R')
 wines <- read.csv('wineQualityWhites.csv')
 ```
 
@@ -295,14 +295,13 @@ Nope, I did not create any additional variables.
 
 I created a few histograms to understand the distribution of the features and box plots to find out the outliers. Yes, there were a few outliers in the features in which I removed to get it to look gaussian or normal distribution. I also applied a log based 10 transformation on the features which had long tails so that the features becomes gaussian. Quality and ph were the features which I did not apply any transformations as they look like normal distribution. Alcohol feature looks like a positive skewed distribution.
 
-# Bivariate Plots Section
-```{r echo=FALSE, Bivariate_Plots}
-
-```
-
 wines$quality_numeric <- as.numeric(wines$quality)
 
-```{r echo=FALSE, message=FALSE, warning=FALSE}
+# Bivariate Plots Section
+
+I will start by doing a simple correlation test on quality versus other features and see whether we can get some insights about the dataset.
+
+```{r echo=FALSE, message=FALSE, warning=FALSE, Bivariate_Plots_Section}
 # fixed.acidity
 with(subset(wines, fixed.acidity>=4 & fixed.acidity<=11), cor.test(fixed.acidity, quality, method = 'pearson'))
 # -0.110
@@ -348,6 +347,34 @@ with(subset(wines, alcohol>=8 & alcohol<=14.20), cor.test(alcohol, quality, meth
 # 0.436
 
 ```
+It appears that alcohol, density, chlorides, total.sulfur.dioxide and volatile.acidity
+
+```{r echo=FALSE, Bivariate_Plots}
+p1 <- ggplot(aes(x = quality, y = alcohol), data = wines) +
+      geom_boxplot() +
+      ggtitle('Quality vs Alcohol')
+
+p2 <- ggplot(aes(x = quality, y = density), data = wines) +
+      geom_boxplot() +
+      ggtitle('Quality vs Density')
+
+p3 <- ggplot(aes(x = quality, y = chlorides), data = wines) +
+      geom_boxplot() +
+      ggtitle('Quality vs Chlorides')
+
+p4 <- ggplot(aes(x = quality, y = volatile.acidity), data = wines) +
+      geom_boxplot() +
+      ggtitle('Quality vs Volatile.acidity')
+
+p5 <- ggplot(aes(x = quality, y = total.sulfur.dioxide), data = wines) +
+      geom_boxplot() +
+      ggtitle('Quality vs total.sulfur.dioxide')
+
+grid.arrange(p1,p2,p3,p4,p5, ncol = 2, main = "Relationship between Quality and 4 highest correlated variables \n")
+```
+
+set.seed(3000)
+ggpairs(wines[sample.int(nrow(wines), 1500),])
 
 # Bivariate Analysis
 
