@@ -376,6 +376,30 @@ grid.arrange(p1,p2,p3,p4,p5, ncol = 2, main = "Relationship between Quality and 
 set.seed(3000)
 ggpairs(wines[sample.int(nrow(wines), 1500),])
 
+ggplot(aes(x = alcohol, y = density), data = wines) + 
+       geom_point(position = position_jitter(h =.001, w = 0.3)) + 
+       ylim(c(.9875, 1.0025)) + 
+       stat_smooth(method = 'lm') + 
+       ggtitle('Density v. Alcohol')
+
+
+ggplot(aes(x = alcohol, y = log10(residual.sugar)), data = wines) + 
+       geom_point(position = position_jitter(h =2, w = 0.3)) +         
+       stat_smooth(method = 'lm') + 
+       ggtitle('Log10 Density v. Residual Sugar')
+       
+ggplot(aes(x = alcohol, y = log10(chlorides)), data = wines) + 
+       geom_point(position = position_jitter(h = .05, w = 0.3)) + 
+       stat_smooth(method = 'lm') +
+       ggtitle('Log10 Chlorides v. Alcohol')
+       
+ggplot(aes(x = alcohol, y = total.sulfur.dioxide), data = wines) + 
+       geom_point(position = position_jitter(h = 2, w = 0.3)) + 
+       ylim(c(50, 250)) + 
+       stat_smooth(method = 'lm') + 
+       ggtitle('Total Sulfur Dioxide v. Alcohol')
+
+
 # Bivariate Analysis
 
 ### Talk about some of the relationships you observed in this part of the investigation. How did the feature(s) of interest vary with other features in the dataset?
