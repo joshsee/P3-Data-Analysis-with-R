@@ -349,6 +349,9 @@ with(subset(wines, alcohol>=8 & alcohol<=14.20), cor.test(alcohol, quality, meth
 ```
 It appears that alcohol, density, chlorides, total.sulfur.dioxide and volatile.acidity
 
+set.seed(3000)
+ggpairs(wines[sample.int(nrow(wines), 1500),])
+
 ```{r echo=FALSE, Bivariate_Plots}
 p1 <- ggplot(aes(x = quality, y = alcohol), data = wines) +
       geom_boxplot() +
@@ -370,44 +373,82 @@ p5 <- ggplot(aes(x = quality, y = total.sulfur.dioxide), data = wines) +
       geom_boxplot() +
       ggtitle('Quality vs total.sulfur.dioxide')
 
-grid.arrange(p1,p2,p3,p4,p5, ncol = 2, main = "Relationship between Quality and 4 highest correlated variables \n")
+p6 <- ggplot(aes(x = quality, y = pH), data = wines) +
+      geom_boxplot() +
+      ggtitle('Quality vs ph')
+
+grid.arrange(p1,p2,p3,p4,p5,p6, ncol = 2, main = "Relationship between Quality and 6 highest correlated variables \n")
 ```
 
-set.seed(3000)
-ggpairs(wines[sample.int(nrow(wines), 1500),])
-
 ggplot(aes(x = alcohol, y = density), data = wines) + 
-       geom_point(position = position_jitter(h =.001, w = 0.3)) + 
+       geom_point(alpha = 1/5) + 
        ylim(c(.9875, 1.0025)) + 
        stat_smooth(method = 'lm') + 
-       ggtitle('Density v. Alcohol')
+       ggtitle('Density vs Alcohol')
 
 
 ggplot(aes(x = alcohol, y = log10(residual.sugar)), data = wines) + 
-       geom_point(position = position_jitter(h =2, w = 0.3)) +         
+       geom_point(alpha = 1/5) +         
        stat_smooth(method = 'lm') + 
-       ggtitle('Log10 Density v. Residual Sugar')
-       
-ggplot(aes(x = alcohol, y = log10(chlorides)), data = wines) + 
-       geom_point(position = position_jitter(h = .05, w = 0.3)) + 
-       stat_smooth(method = 'lm') +
-       ggtitle('Log10 Chlorides v. Alcohol')
-       
-ggplot(aes(x = alcohol, y = total.sulfur.dioxide), data = wines) + 
-       geom_point(position = position_jitter(h = 2, w = 0.3)) + 
-       ylim(c(50, 250)) + 
-       stat_smooth(method = 'lm') + 
-       ggtitle('Total Sulfur Dioxide v. Alcohol')
+       ggtitle('Log10 Residual Sugar vs Alcohol')
 
+
+ggplot(aes(x = alcohol, y = log10(chlorides)), data = wines) + 
+       geom_point(alpha = 1/5) +       
+       stat_smooth(method = 'lm') +
+       ggtitle('Log10 Chlorides vs Alcohol')
+
+
+ggplot(aes(x = alcohol, y = chlorides), data = wines) +
+       geom_point(alpha = 1/5) +
+       scale_x_continuous(lim = c(8, quantile(wines$alcohol, 0.99))) +
+       scale_y_continuous(lim = c(0, quantile(wines$chlorides, 0.99))) +    
+       stat_smooth(method = 'lm') +       
+       ggtitle('Chlorides vs Alcohol')
+
+
+ggplot(aes(x = alcohol, y = total.sulfur.dioxide), data = wines) +
+       geom_point(alpha = 1/5) +
+       scale_x_continuous(lim = c(8, quantile(wines$alcohol, 0.99))) +
+       scale_y_continuous(lim = c(0, quantile(wines$total.sulfur.dioxide, 0.99))) +    
+       stat_smooth(method = 'lm') +       
+       ggtitle('Total Sulfur Dioxide vs Alcohol')
+
+
+```{r echo=FALSE}
+ggplot(aes(x = density, y = residual.sugar), data = wines) +
+       geom_point(alpha = 1/5) +
+       scale_x_continuous(limits = c(quantile(wines$density, 0),
+                                      quantile(wines$density, 0.99))) +
+      scale_y_continuous(limits = c(quantile(wines$residual.sugar, 0),
+                                      quantile(wines$residual.sugar, 0.99))) +
+        geom_smooth(method = 'lm') + 
+        ggtitle('Residual Sugar vs Density')
+```
+
+```{r echo=FALSE}
+ggplot(aes(x = density, y = total.sulfur.dioxide), data = wines) +
+  geom_point(alpha = 1/5) +
+  scale_x_continuous(limits = c(quantile(wines$density, 0), 
+                                quantile(wines$density, 0.99))) +
+  scale_y_continuous(limits = c(quantile(wines$total.sulfur.dioxide, 0),
+                                quantile(wines$total.sulfur.dioxide,
+                                         0.99))) +
+  geom_smooth(method = 'lm')+ 
+  ggtitle('Total.sulfur.dioxide vs Density')
+```
 
 # Bivariate Analysis
 
 ### Talk about some of the relationships you observed in this part of the investigation. How did the feature(s) of interest vary with other features in the dataset?
 
+
+
 ### Did you observe any interesting relationships between the other features (not the main feature(s) of interest)?
 
 ### What was the strongest relationship you found?
 
+The strongest relationship found was density and residual.sugar with a correlation of 0.828.
 
 # Multivariate Plots Section
 
