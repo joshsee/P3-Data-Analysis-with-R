@@ -49,7 +49,7 @@ names(wines)
 str(wines)
 ```
 
-I find out that the first col X is a unique index variable for each individual observation. I think not very useful to the analysis so its best to remove it before procceding to the next step.
+I found out that the first col X is a unique index variable for each individual observation. I think not very useful to the analysis so its best to remove it before procceding to the next step.
 
 ```{r echo=FALSE, message=FALSE, warning=FALSE}
 # Selecting only col 2 to col 13, excluding the first col (Line no.)
@@ -72,19 +72,19 @@ Lets take a look at each properties to get a sense of data distribution.
 ### Quality
 ```{r echo=FALSE, message=FALSE, warning=FALSE, Quality}
 # Since wine is just an integer, we can change that to a categorical variables
-wines$quality <- factor(wines$quality)
-wines$quality_numeric <- as.numeric(wines$quality)
+wines$quality_category <- factor(wines$quality)
+#wines$quality_numeric <- as.numeric(wines$quality)
 ```
 
 #### Levels attributes of wine quality
 ```{r echo=FALSE, message=FALSE, warning=FALSE, Levels_attributes_of_wine_quality}
-levels(wines$quality)
+levels(wines$quality_category)
 ```
 
 ```{r echo=FALSE, message=FALSE, warning=FALSE}
-summary(wines$quality)
+summary(wines$quality_category)
 
-qplot(x=quality, data = wines, binwidth=1, 
+qplot(x=quality_category, data = wines, binwidth=1, 
       xlab='Quality', 
       ylab='Count',
       color=I('black'), fill=I('#F79420'))
@@ -299,81 +299,37 @@ wines$quality_numeric <- as.numeric(wines$quality)
 
 # Bivariate Plots Section
 
-I will start by doing a simple correlation test on quality versus other features and see whether we can get some insights about the dataset.
-
-```{r echo=FALSE, message=FALSE, warning=FALSE, Bivariate_Plots_Section}
-# fixed.acidity
-with(subset(wines, fixed.acidity>=4 & fixed.acidity<=11), cor.test(fixed.acidity, quality, method = 'pearson'))
-# -0.110
-
-# volatile.acidity
-cor.test(log10(wines$volatile.acidity), wines$quality, method='pearson')    
-# -0.197
-
-# citric.acid
-with(subset(wines, citric.acid>=0 & citric.acid<=1), cor.test(citric.acid, quality_numeric, method='pearson'))
-# -0.001
-
-# residual.sugar
-cor.test(log10(wines$residual.sugar), wines$quality, method='pearson')
-# -0.065
-
-# chlorides
-cor.test(log10(wines$chlorides), wines$quality, method='pearson')           
-# -0.272
-
-#Free.sulfur.dioxide
-with(subset(wines, free.sulfur.dioxide>=0 & free.sulfur.dioxide<=90), cor.test(free.sulfur.dioxide, quality, method='pearson'))
-# 0.031
-
-# Total.sulfur.dioxide
-with(subset(wines, total.sulfur.dioxide>=0 & total.sulfur.dioxide<=30), cor.test(total.sulfur.dioxide, quality, method='pearson'))
-# 0.160
-
-# Density
-with(subset(wines, density>=0.98 & density<=1.01), cor.test(density, quality, method='pearson'))
-# -0.317
-
-# PH
-cor.test(wines$pH, wines$quality, method='pearson')
-# 0.099
-
-# Sulphates
-cor.test(log10(wines$sulphates), wines$quality, method='pearson')
-# 0.037
-
-# Alcohol
-with(subset(wines, alcohol>=8 & alcohol<=14.20), cor.test(alcohol, quality, method='pearson')) 
-# 0.436
-
-```
-It appears that alcohol, density, chlorides, total.sulfur.dioxide and volatile.acidity
+I decided to plot out ggpairs to have a look into the relationships.
 
 set.seed(3000)
 ggpairs(wines[sample.int(nrow(wines), 1500),])
 
+It appears that alcohol, ph, sulphates, citric.acid
+
+, density, chlorides, total.sulfur.dioxide and volatile.acidity
+
 ```{r echo=FALSE, Bivariate_Plots}
-p1 <- ggplot(aes(x = quality, y = alcohol), data = wines) +
+p1 <- ggplot(aes(x = quality_category, y = alcohol), data = wines) +
       geom_boxplot() +
       ggtitle('Quality vs Alcohol')
 
-p2 <- ggplot(aes(x = quality, y = density), data = wines) +
+p2 <- ggplot(aes(x = quality_category, y = density), data = wines) +
       geom_boxplot() +
       ggtitle('Quality vs Density')
 
-p3 <- ggplot(aes(x = quality, y = chlorides), data = wines) +
+p3 <- ggplot(aes(x = quality_category, y = chlorides), data = wines) +
       geom_boxplot() +
       ggtitle('Quality vs Chlorides')
 
-p4 <- ggplot(aes(x = quality, y = volatile.acidity), data = wines) +
+p4 <- ggplot(aes(x = quality_category, y = volatile.acidity), data = wines) +
       geom_boxplot() +
       ggtitle('Quality vs Volatile.acidity')
 
-p5 <- ggplot(aes(x = quality, y = total.sulfur.dioxide), data = wines) +
+p5 <- ggplot(aes(x = quality_category, y = total.sulfur.dioxide), data = wines) +
       geom_boxplot() +
       ggtitle('Quality vs total.sulfur.dioxide')
 
-p6 <- ggplot(aes(x = quality, y = pH), data = wines) +
+p6 <- ggplot(aes(x = quality_category, y = pH), data = wines) +
       geom_boxplot() +
       ggtitle('Quality vs ph')
 
@@ -414,18 +370,6 @@ ggplot(aes(x = alcohol, y = total.sulfur.dioxide), data = wines) +
        stat_smooth(method = 'lm') +       
        ggtitle('Total Sulfur Dioxide vs Alcohol')
 
-
-```{r echo=FALSE}
-ggplot(aes(x = density, y = residual.sugar), data = wines) +
-       geom_point(alpha = 1/5) +
-       scale_x_continuous(limits = c(quantile(wines$density, 0),
-                                      quantile(wines$density, 0.99))) +
-      scale_y_continuous(limits = c(quantile(wines$residual.sugar, 0),
-                                      quantile(wines$residual.sugar, 0.99))) +
-        geom_smooth(method = 'lm') + 
-        ggtitle('Residual Sugar vs Density')
-```
-
 ```{r echo=FALSE}
 ggplot(aes(x = density, y = total.sulfur.dioxide), data = wines) +
   geom_point(alpha = 1/5) +
@@ -438,13 +382,30 @@ ggplot(aes(x = density, y = total.sulfur.dioxide), data = wines) +
   ggtitle('Total.sulfur.dioxide vs Density')
 ```
 
+
+```{r echo=FALSE}
+ggplot(aes(x = density, y = residual.sugar), data = wines) +
+       geom_point(alpha = 1/5) +
+       scale_x_continuous(limits = c(quantile(wines$density, 0),
+                                      quantile(wines$density, 0.99))) +
+      scale_y_continuous(limits = c(quantile(wines$residual.sugar, 0),
+                                      quantile(wines$residual.sugar, 0.99))) +
+        geom_smooth(method = 'lm') + 
+        ggtitle('Residual Sugar vs Density')
+```
+
+Indeed, plotting both of these two variables together shows a strong correlation.
+
+
 # Bivariate Analysis
 
 ### Talk about some of the relationships you observed in this part of the investigation. How did the feature(s) of interest vary with other features in the dataset?
 
-
+The main relationship observed was alcohol and quality. 
 
 ### Did you observe any interesting relationships between the other features (not the main feature(s) of interest)?
+
+The other features which shows interesting relationship was Free.sulfur.dioxide and total.sulfur.dioxide.
 
 ### What was the strongest relationship you found?
 
@@ -470,7 +431,12 @@ The strongest relationship found was density and residual.sugar with a correlati
 
 ### Plot One
 ```{r echo=FALSE, Plot_One}
-
+ggplot(aes(x=alcohol), data = wines) +
+  geom_bar(binwidth = 0.1) +
+  xlab("Alcohol (% by volume)") +
+  ylab("Occurence") +
+  scale_x_continuous(limits = c(8,15), breaks = seq(8,15,1)) +
+  ggtitle("Histogram for Alcohol Percentage")
 ```
 
 ### Description One
