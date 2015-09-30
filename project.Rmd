@@ -71,20 +71,19 @@ Lets take a look at each properties to get a sense of data distribution.
 
 ### Quality
 ```{r echo=FALSE, message=FALSE, warning=FALSE, Quality}
-# Since wine is just an integer, we can change that to a categorical variables
-wines$quality_category <- factor(wines$quality)
-#wines$quality_numeric <- as.numeric(wines$quality)
+# Since wine is just an integer, we can change quality scores as a factor, so that we can use it later
+wines$quality_as_factor <- factor(wines$quality, levels=c(0,1,2,3,4,5,6,7,8,9,10))
 ```
 
 #### Levels attributes of wine quality
 ```{r echo=FALSE, message=FALSE, warning=FALSE, Levels_attributes_of_wine_quality}
-levels(wines$quality_category)
+levels(wines$quality_as_factor)
 ```
 
 ```{r echo=FALSE, message=FALSE, warning=FALSE}
-summary(wines$quality_category)
+summary(wines$quality_as_factor)
 
-qplot(x=quality_category, data = wines, binwidth=1, 
+qplot(x=quality_as_factor, data = wines, binwidth=1, 
       xlab='Quality', 
       ylab='Count',
       color=I('black'), fill=I('#F79420'))
@@ -262,6 +261,8 @@ The desity histogram shows a normal distribution once the outlier is removed.
 ```{r echo=FALSE}
 summary(wines$alcohol)
 
+tapply(wines$alcohol, wines$quality, mean)
+
 qplot(y=alcohol,  x=factor(0), data=wines, geom='boxplot')
 
 qplot(x = alcohol, data=wines, binwidth=.2, 
@@ -285,7 +286,13 @@ The main feature that is important to this analysis is the wine quality. Analysi
 
 ### What other features in the dataset do you think will help support your investigation into your feature(s) of interest?
 
+I took a look at how correlated our different variables with quality:
 
+```{r echo=FALSE}
+cor(x=wines[,2:11],y=wines$quality)
+```
+
+I will concentrate in the first four variables that show strongest correlation with quality which are alcohol, ph, chlorides and density. 
 
 ### Did you create any new variables from existing variables in the dataset?
 
@@ -299,39 +306,67 @@ wines$quality_numeric <- as.numeric(wines$quality)
 
 # Bivariate Plots Section
 
-set.seed(3000)
-ggpairs(wines[sample.int(nrow(wines), 1500),])
+```{r echo=FALSE}
+#set.seed(3000)
+#ggpairs(wines[sample.int(nrow(wines), 1500),])
+```
 
-I decided to plot out ggpairs to have a look into the relationships. I found out that the top 4 most correclated variables with quality were alcohol, ph, sulphates, citric.acid
+I decided to plot out ggpairs to have a look into the relationships. I found out that the top 4 most correclated variables with quality were alcohol, ph, chlorides, density.
 
 ```{r echo=FALSE, Bivariate_Plots}
-p1 <- ggplot(aes(x = quality_category, y = alcohol), data = wines) +
+p1 <- ggplot(aes(x = quality_as_factor, y = alcohol), data = wines) +
       geom_boxplot() +
+      xlab("Quality") +
+      ylab("Alcohol") +
       ggtitle('Quality vs Alcohol')
 
-p2 <- ggplot(aes(x = quality_category, y = pH), data = wines) +
+p2 <- ggplot(aes(x = quality_as_factor, y = pH), data = wines) +
       geom_boxplot() +
+      xlab("Quality") +
+      ylab("pH") +
       ggtitle('Quality vs ph')
 
-p3 <- ggplot(aes(x = quality_category, y = sulphates), data = wines) +
+p3 <- ggplot(aes(x = quality_as_factor, y = log10(chlorides)), data = wines) +
       geom_boxplot() +
-      ggtitle('Quality vs Sulphates')
+      xlab("Quality") +
+      ylab("Chlorides") +
+      ggtitle('Quality vs Chlorides')
 
-p4 <- ggplot(aes(x = quality_category, y = citric.acid), data = wines) +
+p4 <- ggplot(aes(x = quality_as_factor, y = density), data = wines) +
       geom_boxplot() +
-      ggtitle('Quality vs Sulphates')
+      ylim(c(0.98, 1.01)) +
+      xlab("Quality") +
+      ylab("Density") +
+      ggtitle('Quality vs Density')
 
 grid.arrange(p1,p2,p3,p4, ncol = 2, main = "Relationship between Quality and 4 highest correlated variables \n")
 ```
 
-From the boxplot above, we were able to understand more about the relationship between quality and other variables. From quality vs alcohol plot, we can clearly see that as the quality increases the alcohol level increases as well. 
+From the boxplot above, we were able to understand more about the relationship between quality and other variables. From quality vs alcohol plot, we can clearly see that as the quality increases the alcohol level increases as well.
 
+### Alcohol vs Quality
+
+```{r echo=FALSE}
+ggplot(aes(x = as.numeric(quality), y = alcohol), data = wines) + 
+      geom_jitter(alpha=1/5) +
+      geom_smooth(method='lm', aes(group = 1)) +
+      xlab("Quality") +
+      ylab("Alcohol")
+```
+
+We already see a tendency in the boxplot, this can be better illustrate with a scatter plot and a linear regression line in it.
+
+### Density vs Quality
+
+```{r echo=FALSE}
 ggplot(aes(x = alcohol, y = density), data = wines) + 
        geom_point(alpha = 1/5) + 
        ylim(c(.9875, 1.0025)) + 
-       stat_smooth(method = 'lm') + 
-       ggtitle('Density vs Alcohol')
-
+       stat_smooth(method = 'lm', aes(group = 1)) + 
+       ggtitle('Density vs Alcohol')+
+       xlab("Quality") +
+       ylab("Density")
+```
 
 ggplot(aes(x = alcohol, y = log10(residual.sugar)), data = wines) + 
        geom_point(alpha = 1/5) +         
@@ -373,13 +408,16 @@ ggplot(aes(x = density, y = total.sulfur.dioxide), data = wines) +
 ```
 
 
+### Residual Sugar vs Density
 ```{r echo=FALSE}
 ggplot(aes(x = density, y = residual.sugar), data = subset(wines,
                   residual.sugar<quantile(wines$residual.sugar,.99) & 
                   density<quantile(density,.99))) +
-       geom_point(alpha = 1/5) +       
+        geom_point(alpha = 1/5) +       
         geom_smooth(method = 'lm') + 
-        ggtitle('Residual Sugar vs Density')
+        ggtitle('Residual Sugar vs Density') +
+        xlab("Density") +
+        ylab("Residual Sugar") 
 
 cor.test(wines$density, wines$residual.sugar, method='pearson')
 ```
