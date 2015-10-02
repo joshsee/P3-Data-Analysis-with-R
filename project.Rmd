@@ -73,6 +73,8 @@ Lets take a look at each properties to get a sense of data distribution.
 ```{r echo=FALSE, message=FALSE, warning=FALSE, Quality}
 # Since wine is just an integer, we can change quality scores as a factor, so that we can use it later
 wines$quality_as_factor <- factor(wines$quality, levels=c(0,1,2,3,4,5,6,7,8,9,10))
+
+wines$quality_cut <- cut(wines$quality, breaks=c(0,4,6,10))
 ```
 
 #### Levels attributes of wine quality
@@ -80,7 +82,11 @@ wines$quality_as_factor <- factor(wines$quality, levels=c(0,1,2,3,4,5,6,7,8,9,10
 levels(wines$quality_as_factor)
 ```
 
-```{r echo=FALSE, message=FALSE, warning=FALSE}
+### Quality
+
+```{r echo=FALSE, message=FALSE, warning=FALSE, quality}
+summary(wines$quality)
+
 summary(wines$quality_as_factor)
 
 qplot(x=quality_as_factor, data = wines, binwidth=1, 
@@ -89,7 +95,14 @@ qplot(x=quality_as_factor, data = wines, binwidth=1,
       color=I('black'), fill=I('#F79420'))
 ```
 
-I factor the wine quality from an integer variable to a categorical varible as its kind of arbitary and can be represented by another form of values not just integer. The histogram shows the shape of normal distribution. Most of the wine are rated with a quality score of 6 and with a range of 3 to 9.
+I factor the wine quality from an integer variable to a categorical varible as its kind of arbitary and can be represented by another form of values not just integer. The histogram shows the shape of normal distribution. 
+
+The range of possible scores is from 0 to 10, in the dataset the minimum score is 3 and maximum is 9. The mean is 5.878 and the median is 6 which is very close to each other.
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+Wine_quality_mode <- names(which.max(table(wines$quality)))
+```
+So the mode of the quality score is 6.
 
 ### Fixed.acidity
 ```{r echo=FALSE, message=FALSE, warning=FALSE, fixed_acidity}
@@ -111,7 +124,7 @@ There seems be a right tail when the histogram was initially chartted. Once the 
 ```{r echo=FALSE, message=FALSE, warning=FALSE, volative_acidity}
 summary(wines$volatile.acidity)
 
-summary(log10(wines$volatile.acidit))
+summary(log10(wines$volatile.acidity))
 
 qplot(x=log10(volatile.acidity), data=wines, binwidth=.03,
       xlab='Volatile Acidity', 
@@ -140,9 +153,9 @@ Using a box plot, we can cleary visualize the outlier which may cause the histog
 
 ### Residual.sugar
 ```{r echo=FALSE, message=FALSE, warning=FALSE, residual_sugar}
-summary(wines$volatile.acidity)
+summary(wines$residual.sugar)
 
-summary(log10(wines$volatile.acidit))
+summary(log10(wines$residual.sugar))
 
 qplot(y=residual.sugar,  x=factor(0), data=wines, geom='boxplot')
 
@@ -286,13 +299,26 @@ The main feature that is important to this analysis is the wine quality. Analysi
 
 ### What other features in the dataset do you think will help support your investigation into your feature(s) of interest?
 
-I took a look at how correlated our different variables with quality:
+Lets take a look at how correlated the variables are:
 
 ```{r echo=FALSE}
-cor(x=wines[,2:11],y=wines$quality)
+cor(x=wines[,1:11],y=wines$quality)
 ```
 
-I will concentrate in the first four variables that show strongest correlation with quality which are alcohol, ph, chlorides and density. 
+We can see that the following variables are correlated with quallity:
+* density (Highly correlated)
+* chlorides (Moderatelly correlated)
+* volatile.acidity (Moderatelly correlated)
+* total.sulfur.dioxide (Moderatelly correlated)
+* fixed.acidity (Moderatelly correlated)
+* residual.sugar
+* citric.acid
+* free.sulfur.dioxide
+* sulphates
+* pH
+* alcohol (Highly correlated)
+
+We will concentrate on the top variables that show strong correlation
 
 ### Did you create any new variables from existing variables in the dataset?
 
@@ -301,8 +327,6 @@ Nope, I did not create any additional variables.
 ### Of the features you investigated, were there any unusual distributions? Did you perform any operations on the data to tidy, adjust, or change the form of the data? If so, why did you do this?
 
 I created a few histograms to understand the distribution of the features and box plots to find out the outliers. Yes, there were a few outliers in the features in which I removed to get it to look gaussian or normal distribution. I also applied a log based 10 transformation on the features which had long tails so that the features becomes gaussian. Quality and ph were the features which I did not apply any transformations as they look like normal distribution. Alcohol feature looks like a positive skewed distribution.
-
-wines$quality_numeric <- as.numeric(wines$quality)
 
 # Bivariate Plots Section
 
@@ -320,11 +344,12 @@ p1 <- ggplot(aes(x = quality_as_factor, y = alcohol), data = wines) +
       ylab("Alcohol") +
       ggtitle('Quality vs Alcohol')
 
-p2 <- ggplot(aes(x = quality_as_factor, y = pH), data = wines) +
+p2 <- ggplot(aes(x = quality_as_factor, y = density), data = wines) +
       geom_boxplot() +
+      ylim(c(0.98, 1.01)) +
       xlab("Quality") +
-      ylab("pH") +
-      ggtitle('Quality vs ph')
+      ylab("Density") +
+      ggtitle('Quality vs Density')
 
 p3 <- ggplot(aes(x = quality_as_factor, y = log10(chlorides)), data = wines) +
       geom_boxplot() +
@@ -332,14 +357,25 @@ p3 <- ggplot(aes(x = quality_as_factor, y = log10(chlorides)), data = wines) +
       ylab("Chlorides") +
       ggtitle('Quality vs Chlorides')
 
-p4 <- ggplot(aes(x = quality_as_factor, y = density), data = wines) +
+p4 <- ggplot(aes(x = quality_as_factor, y = log10(volatile.acidity)), data = wines) +
       geom_boxplot() +
-      ylim(c(0.98, 1.01)) +
       xlab("Quality") +
-      ylab("Density") +
-      ggtitle('Quality vs Density')
+      ylab("Volatile.acidity") +
+      ggtitle('Quality vs Volatile.acidity')
 
-grid.arrange(p1,p2,p3,p4, ncol = 2, main = "Relationship between Quality and 4 highest correlated variables \n")
+p5 <- ggplot(aes(x = quality_as_factor, y = total.sulfur.dioxide), data = wines) +
+      geom_boxplot() +
+      xlab("Quality") +
+      ylab("Total.sulfur.dioxide") +
+      ggtitle('Quality vs Total.sulfur.dioxide')
+
+p6 <- ggplot(aes(x = quality_as_factor, y = fixed.acidity), data = wines) +
+      geom_boxplot() +
+      xlab("Quality") +
+      ylab("Fixed.acidity") +
+      ggtitle('Quality vs Fixed.acidity')
+
+grid.arrange(p1,p2,p3,p4,p5,p6, ncol = 2, main = "Relationship between Quality and 6 highest correlated variables \n")
 ```
 
 From the boxplot above, we were able to understand more about the relationship between quality and other variables. From quality vs alcohol plot, we can clearly see that as the quality increases the alcohol level increases as well.
@@ -347,9 +383,9 @@ From the boxplot above, we were able to understand more about the relationship b
 ### Alcohol vs Quality
 
 ```{r echo=FALSE}
-ggplot(aes(x = as.numeric(quality), y = alcohol), data = wines) + 
+ggplot(aes(x = quality, y = alcohol), data = wines) + 
       geom_jitter(alpha=1/5) +
-      geom_smooth(method='lm', aes(group = 1)) +
+      geom_smooth(method='lm') +
       xlab("Quality") +
       ylab("Alcohol")
 ```
@@ -362,7 +398,7 @@ We already see a tendency in the boxplot, this can be better illustrate with a s
 ggplot(aes(x = alcohol, y = density), data = wines) + 
        geom_point(alpha = 1/5) + 
        ylim(c(.9875, 1.0025)) + 
-       stat_smooth(method = 'lm', aes(group = 1)) + 
+       stat_smooth(method = 'lm') + 
        ggtitle('Density vs Alcohol')+
        xlab("Quality") +
        ylab("Density")
@@ -442,6 +478,12 @@ The strongest relationship found was density and residual.sugar with a correlati
 
 ```{r echo=FALSE, Multivariate_Plots}
 
+ggplot(data=wines, aes(x=alcohol, y=citric.acid)) +    
+    geom_jitter(alpha=.5, aes(size=quality_cut, color=quality_cut)) +
+    coord_cartesian(
+        xlim=c(quantile(wines$alcohol,.01),quantile(wines$alcohol,.99)),
+        ylim=c(quantile(wines$citric.acid,.01),quantile(wines$citric.acid,.99))
+        )
 ```
 
 # Multivariate Analysis
