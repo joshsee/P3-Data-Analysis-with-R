@@ -631,6 +631,7 @@ ggplot(aes(x = density, y = residual.sugar),
         ggtitle('Residual Sugar vs Density') +
         xlab("Density") +
         ylab("Residual Sugar")
+
 ```
 
 When we swap out alcohol with our defined variable `quality` cut. The result is more obvious. We can see that better quality score wines are concentrated on the left hand side of the plot where as bad quality score wines are on the right.
@@ -654,7 +655,7 @@ Initially, I thought `pH` has a little bit of correlation with `quality`. Thus `
 
 ### Talk about some of the relationships you observed in this part of the investigation. Were there features that strengthened each other in terms of looking at your feature(s) of interest?
 
-
+The relationship between `density` and `residual.sugar` and `alcohol` seems quite interesting. Since all of them are highly correlated with one another, it is easy to spot the changes as any one of the variable varies. When we swapped out `alcohol` with `quality` score the same trend can be spotted as well.
 
 ### Were there any interesting or surprising interactions between features?
 
@@ -670,8 +671,8 @@ As I mentioned above, I thought `pH` would provide some interaction with `qualit
 ```{r echo=FALSE, Plot_One}
 ggplot(aes(x=alcohol), data = wines) +
   geom_bar(binwidth = 0.1) +
-  xlab("Alcohol (% by volume)") +
-  ylab("Occurence") +
+  xlab("Alcohol") +
+  ylab("Count") +
   scale_x_continuous(limits = c(8,15), breaks = seq(8,15,1)) +
   ggtitle("Histogram for Alcohol Percentage")
 ```
