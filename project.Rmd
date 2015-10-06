@@ -86,16 +86,16 @@ levels(wines$quality_as_factor)
 summary(wines$quality)
 ```
 #### Summary quality as factor
-```{r echo=FALSE, message=FALSE, warning=FALSE, summary}
+```{r echo=FALSE, message=FALSE, warning=FALSE, summary_quality_as_factor}
 summary(wines$quality_as_factor)
 ```
 
-```{r echo=FALSE, message=FALSE, warning=FALSE, summary}
+```{r echo=FALSE, message=FALSE, warning=FALSE}
 wines_quality_mode <- names(which.max(table(wines$quality)))
 ```
 Mode of the quality score is 6. Same as what we saw in summary of `quality_as_factor`.
 
-```{r echo=FALSE, message=FALSE, warning=FALSE, summary}
+```{r echo=FALSE, message=FALSE, warning=FALSE}
 qplot(x=quality_as_factor, data = wines, binwidth=1, 
       xlab='Quality', 
       ylab='Count',
@@ -318,9 +318,11 @@ We will concentrate on the top variables that show strong correlation
 
 Yes, since we know that the mode of quality score is 6. We would consider the average is 6 in a 0 to 10 scale. We can define a cut in the scores. 
 
+```{r echo=FALSE, message=FALSE, warning=FALSE}
 wines$quality_cut <- cut(wines$quality, breaks=c(0,5,6,10))
 
 table(wines$quality_cut)
+```
 
 So we will have three groups of wines after the cut. First group has a quality score from 0 to 5, which we can consider the bad quality group. Then the second group which has a score of 6 average quality group and lastly the 7 to 10 quality score group is the best quality group. We will these groups in our analysis.
 
