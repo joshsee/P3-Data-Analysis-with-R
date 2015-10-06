@@ -22,8 +22,8 @@ The goal of this project is to explore the chemical properties found in a tidy d
 ### Load the Data
 ```{r echo=FALSE, message=FALSE, warning=FALSE, Load_the_Data}
 # Load the Data
-setwd("C:\\Users\\Josh\\Documents\\GitHub\\P3-Data-Analysis-with-R")
-#setwd('/Volumes/MacHD/Projects/P3-Data-Analysis-with-R')
+#setwd("C:\\Users\\Josh\\Documents\\GitHub\\P3-Data-Analysis-with-R")
+setwd('/Volumes/MacHD/Projects/P3-Data-Analysis-with-R')
 wines <- read.csv('wineQualityWhites.csv')
 ```
 
@@ -302,14 +302,14 @@ cor(x=wines[,1:11],y=wines$quality)
 We can see that the following variables are correlated with quallity:
 * density (Highly correlated)
 * chlorides (Moderatelly correlated)
-* volatile.acidity (Moderatelly correlated)
-* total.sulfur.dioxide (Moderatelly correlated)
-* fixed.acidity (Moderatelly correlated)
+* volatile.acidity 
+* total.sulfur.dioxide
+* fixed.acidity
 * residual.sugar
 * citric.acid
 * free.sulfur.dioxide
 * sulphates
-* pH
+* pH (Moderatelly correlated)
 * alcohol (Highly correlated)
 
 We will concentrate on the top variables that show strong correlation
@@ -335,7 +335,7 @@ I created a few histograms to understand the distribution of the features and bo
 #ggpairs(wines[sample.int(nrow(wines), 1500),])
 ```
 
-I decided to plot out ggpairs to have a look into the relationships. I found out that the 4 most correclated variables with quality were alcohol, ph, chlorides, density. But lets plot all other variables as well.
+I decided to plot out ggpairs scatterplot matrix to have a look into the relationships between the variables. I found out that the 4 most correclated variables with quality were alcohol, ph, chlorides, density. But lets plot all other variables as well.
 
 ```{r echo=FALSE, message=FALSE, warning=FALSE, Bivariate_Plots}
 p1 <- ggplot(aes(x = quality_as_factor, y = alcohol), data = wines) +
@@ -640,6 +640,16 @@ ggplot(aes(x = pH, y = fixed.acidity), data = wines) +
   geom_jitter(alpha=.3, aes(color=quality_cut)) + 
   guides(color=guide_legend(title="Quality"))
 
+ggplot(aes(x = pH, y = fixed.acidity, color=quality_as_factor), data = wines) + 
+  geom_jitter(alpha=.3) +
+  facet_wrap(~quality_cut) +
+  guides(color=guide_legend(title="Quality"))
+
+
+ggplot(aes(x = alcohol, y = fixed.acidity, color=quality_as_factor), data = wines) + 
+  geom_jitter(alpha=.3) +
+  facet_wrap(~quality_cut) +
+  guides(color=guide_legend(title="Quality"))
 ```
 
 Initially, I thought `pH` has a little bit of correlation with `quality`. Thus `pH` vs `fixed.acidity` should somewhat linked with `quality`. After plotting it out there seems no strong pattern that we can identify from `pH` vs `fixed.acidity` vs `quality`.
@@ -658,18 +668,19 @@ As I mentioned above, I thought `pH` would provide some interaction with `qualit
 
 ### OPTIONAL: Did you create any models with your dataset? Discuss the strengths and limitations of your model.
 
+No.
 ------
 
 # Final Plots and Summary
 
-### Plot One
+### Plot One 
 ```{r echo=FALSE, Plot_One}
 ggplot(aes(x=alcohol), data = wines) +
   geom_histogram(binwidth = 0.15, color = I('black'), fill = I('#F79420')) +
   facet_wrap(~quality_cut) +
   xlab("Alcohol") +
   ylab("Count") +
-  geom_vline(xintercept = mean(wines$alcohol), linetype='longdash', color='blue', alpha=.5)
+  geom_vline(xintercept = mean(wines$alcohol), linetype='longdash', color='blue', alpha=.5) +
   scale_x_continuous(limits = c(8,14), breaks = seq(8,14,1)) +
   ggtitle("Histogram for Alcohol")
 ```
@@ -688,13 +699,16 @@ ggplot(aes(x = density, y = residual.sugar),
   facet_wrap(~quality_cut) +
   geom_vline(xintercept = mean(wines$density), linetype='longdash', color='blue', alpha=.5) +
   geom_hline(yintercept = mean(wines$residual.sugar), linetype='longdash', color='blue', alpha=.5) +
-  ggtitle('Residual Sugar vs Density vs Alcohol') +
+  ggtitle('Log 10 Residual Sugar vs Density vs Alcohol') +
   xlab("Density") +
-  ylab("Residual Sugar")
+  ylab("Log 10 Residual Sugar") +
+  scale_y_log10()
+
 ```
 
 ### Description Two
 
+This graph shows that as `density` and `residual sugar` increase, `alcohol` level decreases. This can be clearly seen in best quality score wines where the color goes from light to dark. Even thought the same color variation applies to average quality score wines and bad quality score wines but its not that significant.
 
 ### Plot Three
 ```{r echo=FALSE, Plot_Three}
@@ -708,7 +722,8 @@ ggplot(data=wines, aes(x=alcohol, y=density, color=quality_as_factor)) +
     guides(color=guide_legend(title="Quality")) +
     geom_point() +
     geom_vline(xintercept = mean(wines$alcohol), linetype='longdash', color='blue', alpha=.5) +
-    geom_hline(yintercept = mean(wines$density), linetype='longdash', color='blue', alpha=.5)
+    geom_hline(yintercept = mean(wines$density), linetype='longdash', color='blue', alpha=.5) +
+    ggtitle('Alcohol vs Density vs Quality')
 
 ```
 
@@ -720,7 +735,7 @@ In this graph, using the newly defined variable cut of quality score. We can see
 
 # Reflection
 
-There are two difficulties which I encountered during the analaysis. One, the lack of categorical variables. In the dataset there is only one categorical variable that we can use which is `quality`, I wish that there were more variables like that as it would allow us to identify more relationship between the variables. Two, the lack of correlations between variables.
+There are two difficulties which I encountered during the analaysis. One, the lack of categorical variables. In the dataset there is only one categorical variable that we can use which is `quality`, I wish that there were more variables like that as it would allow us to identify more relationship between the variables using subset. Two, the lack of correlations between variables. 
 
 Even with the limitation that we had in our dataset, we are still able to discover very interesting findings such as `alcohol` and `density` and `residual.sugar`. I was only able to identify a few of them to understand its influvence over quality score over a scatterplot matrix.
 
