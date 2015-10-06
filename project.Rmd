@@ -22,8 +22,8 @@ The goal of this project is to explore the chemical properties found in a tidy d
 ### Load the Data
 ```{r echo=FALSE, message=FALSE, warning=FALSE, Load_the_Data}
 # Load the Data
-setwd("C:\\Users\\Josh\\Documents\\GitHub\\P3-Data-Analysis-with-R")
-#setwd('/Volumes/MacHD/Projects/P3-Data-Analysis-with-R')
+#setwd("C:\\Users\\Josh\\Documents\\GitHub\\P3-Data-Analysis-with-R")
+setwd('/Volumes/MacHD/Projects/P3-Data-Analysis-with-R')
 wines <- read.csv('wineQualityWhites.csv')
 ```
 
@@ -91,20 +91,20 @@ summary(wines$quality_as_factor)
 ```
 
 ```{r echo=FALSE, message=FALSE, warning=FALSE, summary}
+wines_quality_mode <- names(which.max(table(wines$quality)))
+```
+Mode of the quality score is 6. Same as what we saw in summary of `quality_as_factor`.
+
+```{r echo=FALSE, message=FALSE, warning=FALSE, summary}
 qplot(x=quality_as_factor, data = wines, binwidth=1, 
       xlab='Quality', 
       ylab='Count',
       color=I('black'), fill=I('#F79420'))
 ```
 
-I factor the wine quality from an integer variable to a categorical varible as its kind of arbitary and can be represented by another form of values not just integer. The histogram shows the shape of normal distribution. 
+I factor the wine quality from an integer variable to a categorical varible (`quality_as_factor`) as its kind of arbitary and can be represented by another form of values not just integer. The histogram shows the shape of normal distribution. 
 
 The range of possible scores is from 0 to 10, in the dataset the minimum score is 3 and maximum is 9. The mean is 5.878 and the median is 6 which is very close to each other.
-
-```{r echo=FALSE, message=FALSE, warning=FALSE}
-Wine_quality_mode <- names(which.max(table(wines$quality)))
-```
-So the mode of the quality score is 6.
 
 ### Fixed.acidity
 ```{r echo=FALSE, message=FALSE, warning=FALSE, fixed_acidity}
@@ -319,8 +319,6 @@ We will concentrate on the top variables that show strong correlation
 Yes, since we know that the mode of quality score is 6. We would consider the average is 6 in a 0 to 10 scale. We can define a cut in the scores. 
 
 wines$quality_cut <- cut(wines$quality, breaks=c(0,5,6,10))
-
-wines$quality_cut <- cut(wines$quality, breaks=c(0,4,7,10))
 
 table(wines$quality_cut)
 
@@ -616,25 +614,24 @@ ggplot(aes(x = density, y = residual.sugar),
 
 ```
 
-Since we found out that `density` and `residual.sugar` has the strongest relationship. I explored more with `alcohol`. It appears that as `density` and `residual.sugar` increases the `alcohol` color seems to turn darker in which less `alcohol`.
-
+Since we found out that `density` and `residual.sugar` has the strongest relationship. I explored more with `alcohol`. From the plot it appears that as `density` and `residual.sugar` increases the `alcohol` color seems to turn darker which means `alcohol` decreses.
 
 ```{r echo=FALSE, message=FALSE, warning=FALSE}
 ggplot(aes(x = density, y = residual.sugar), 
        data = subset(wines, residual.sugar<quantile(wines$residual.sugar,.99) & 
                   density<quantile(density,.99))) +
-        geom_jitter(alpha=.5, size=3, aes(size=quality_cut, color=quality_cut)) +
+        geom_jitter(alpha=.5, aes(color=quality_cut)) +
         geom_vline(xintercept = mean(wines$density), linetype='longdash', color='blue', alpha=.5) +
         geom_hline(yintercept = mean(wines$residual.sugar), linetype='longdash', color='blue', alpha=.5) +
-        scale_color_brewer(type = 'div',
-                       guide = guide_legend(title = 'Quality Cut', reverse = T)) +
+        guides(size=guide_legend(title="Quality Cut"), color=guide_legend(title="Quality Cut")) +
         ggtitle('Residual Sugar vs Density') +
         xlab("Density") +
         ylab("Residual Sugar")
-
+        scale_color_brewer(type = 'div',
+                       guide = guide_legend(title = 'Quality Cut', reverse = T)) +
 ```
 
-When we swap out alcohol with our defined variable `quality` cut. The result is more obvious. We can see that better quality score wines are concentrated on the left hand side of the plot where as bad quality score wines are on the right.
+When I swapped out alcohol with my defined new variable `quality` cut. The result is more obvious. We can see that better quality score wines are concentrated on the left hand side of the plot where as bad quality score wines are on the right.
 
 ```{r echo=FALSE, message=FALSE, warning=FALSE}
 ggplot(aes(x = pH, y = fixed.acidity), data = wines) + 
@@ -670,10 +667,20 @@ As I mentioned above, I thought `pH` would provide some interaction with `qualit
 ### Plot One
 ```{r echo=FALSE, Plot_One}
 ggplot(aes(x=alcohol), data = wines) +
-  geom_bar(binwidth = 0.1) +
+  geom_bar(binwidth = 0.15. color = I('black'), fill = I('#099DD9')) +
   xlab("Alcohol") +
   ylab("Count") +
-  scale_x_continuous(limits = c(8,15), breaks = seq(8,15,1)) +
+  scale_x_continuous(limits = c(8,14), breaks = seq(8,14,1)) +
+  ggtitle("Histogram for Alcohol Percentage")
+
+
+ggplot(aes(x=alcohol), data = wines) +
+  geom_histogram(binwidth = .15,
+                 color = I('black'), fill = I('#099DD9')) 
+  facet_wrap(~quality_cut) +
+  xlab("Alcohol") +
+  ylab("Count") +
+  scale_x_continuous(limits = c(8,14), breaks = seq(8,14,1)) +
   ggtitle("Histogram for Alcohol Percentage")
 ```
 
@@ -706,7 +713,7 @@ ggplot(data=wines, aes(x=alcohol, y=pH)) +
 ggplot(aes(x = density, y = residual.sugar), 
        data = subset(wines, residual.sugar<quantile(wines$residual.sugar,.99) & 
                   density<quantile(density,.99))) +
-        geom_jitter(alpha=.5, size=3, aes(size=quality_cut, color=quality_cut))
+        geom_jitter(alpha=.5, aes(size=quality_cut, color=quality_cut))
 
 ```
 
@@ -716,9 +723,22 @@ ggplot(aes(x = density, y = residual.sugar),
 ### Plot Three
 ```{r echo=FALSE, Plot_Three}
 
+ggplot(data=wines, aes(x=alcohol, y=density, color=quality_as_factor)) +
+    coord_cartesian(
+        xlim=c(quantile(wines$alcohol,.01),quantile(wines$alcohol,.99)),
+        ylim=c(quantile(wines$density,.01),quantile(wines$density,.99))
+        ) +
+    facet_wrap(~quality_cut) + 
+    guides(color=guide_legend(title="Quality")) +
+    geom_point() +
+    geom_vline(xintercept = mean(wines$alcohol), linetype='longdash', color='blue', alpha=.5) +
+    geom_hline(yintercept = mean(wines$density), linetype='longdash', color='blue', alpha=.5)
+
 ```
 
 ### Description Three
+
+In this graph, using the newly defined variable cut of quality score. We can see that good wines (8~10) concentrate in the lower right quadrant. That is when density is low and alcohol level is high. For lower quality wines, its concentrated in the upper left quadrant with high density and low alcohol level.   
 
 ------
 
@@ -758,4 +778,24 @@ ggplot(aes(x = density, y = residual.sugar, color = quality_cut), data =
                        guide = guide_legend(title = 'Quality', reverse = T,
                                            override.aes = list(alpha = 1, size = 2))) +  
     scale_y_continuous(trans = log10_trans())
-
+    
+fp2 <- ggplot(aes(x = quality, y = alcohol), data = wines) +
+  geom_jitter(alpha = 1/20, position = position_jitter(width = .1),
+              color = 'red3') + 
+  xlab('Quality Score') +
+  ylab('Alcohol % by Volume') +
+  ggtitle('White Wine by Quality Score and Alcohol %- Scatterplot') +
+  theme(axis.text=element_text(size = 12),
+        axis.title=element_text(size = 12, face = 'bold'),
+        plot.title=element_text(size = 18, face = 'bold'))
+fp3 <- ggplot(aes(x = quality, y = alcohol, fill = quality), 
+              data = wines) +
+  geom_boxplot() +
+  scale_fill_brewer(palette='Blues') +
+  xlab('Quality Score') +
+  ylab('Alcohol % by Volume') +
+  ggtitle('White Wine by Quality Score and Alcohol Percentage- Boxplot') +
+  theme(axis.text=element_text(size = 12),
+        axis.title=element_text(size = 12, face = 'bold'),
+        plot.title=element_text(size = 18, face = 'bold'))
+grid.arrange(fp2,fp3,ncol=1)
