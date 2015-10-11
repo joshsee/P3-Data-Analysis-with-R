@@ -24,8 +24,8 @@ closely related to the wine quality score.
 ### Load the Data
 ```{r echo=FALSE, message=FALSE, warning=FALSE, Load_the_Data}
 # Load the Data
-setwd("C:\\Users\\Josh\\Documents\\GitHub\\P3-Data-Analysis-with-R")
-#setwd('/Volumes/MacHD/Projects/P3-Data-Analysis-with-R')
+#setwd("C:\\Users\\Josh\\Documents\\GitHub\\P3-Data-Analysis-with-R")
+setwd('/Volumes/MacHD/Projects/P3-Data-Analysis-with-R')
 wines <- read.csv('wineQualityWhites.csv')
 ```
 
@@ -828,7 +828,6 @@ score wines shows us more of a shape of normal distribution of alcohol. Best
 quality score shows a negatively skewed distribution towards higher alcohol
 level.  
 
-
 ### Plot Two
 ```{r echo=FALSE, message=FALSE, warning=FALSE, Plot_Two}
 ggplot(aes(x = density, y = residual.sugar), 
@@ -877,11 +876,7 @@ ggplot(data=wines, aes(x=alcohol, y=density, color=quality_as_factor)) +
 
 ### Description Three
 
-In this graph, using the newly defined variable cut of quality score. We can see
-that best wines quality score (8~10) concentrate in the lower right quadrant.
-That is when density is low and alcohol level is high. For bad quality score
-wines (0~5), its concentrated in the upper left quadrant with high density and
-low alcohol level.   
+In this graph, using the newly defined variable cut of quality score. We can see that best wines quality score (8~10) concentrate in the lower right quadrant. That is when density is low and alcohol level is high. For bad quality score wines (0~5), its concentrated in the upper left quadrant with high density and low alcohol level.   
 
 ------
 
