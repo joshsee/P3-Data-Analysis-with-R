@@ -1,0 +1,13 @@
+I reference several websites for this project
+http://rmarkdown.rstudio.com/authoring_basics.html
+https://rstudio-pubs-static.s3.amazonaws.com/64286_2635bf8b05fb4423ac2968243211b46b.html
+http://docs.ggplot2.org/current/
+
+
+Udacity Discussion
+https://discussions.udacity.com
+
+Stackoverflow
+http://stackoverflow.com/
+
+I hereby confirm that this submission is my work. I have cited above the origins of any parts of the submission that were taken from Websites, books, forums, blog posts, github repositories, etc.

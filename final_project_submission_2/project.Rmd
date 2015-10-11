@@ -1,0 +1,900 @@
+White Wine Quality Exploration by Josh See
+========================================================
+
+```{r echo=FALSE, message=FALSE, warning=FALSE, packages}
+# Load all of the packages that you end up using
+# in your analysis in this code chunk.
+
+# Notice that the parameter "echo" was set to FALSE for this code chunk.
+# This prevents the code from displaying in the knitted HTML output.
+# You should set echo=FALSE for all code chunks in your file.
+
+library(ggplot2)
+library(dplyr)
+library(gridExtra)
+library(GGally)
+library(scales)
+```
+ 
+### Introduction
+The goal of this project is to explore the chemical properties found in a tidy 
+data set of white wines and to understand and summarize which properties is 
+closely related to the wine quality score.
+
+### Load the Data
+```{r echo=FALSE, message=FALSE, warning=FALSE, Load_the_Data}
+# Load the Data
+#setwd("C:\\Users\\Josh\\Documents\\GitHub\\P3-Data-Analysis-with-R")
+setwd('/Volumes/MacHD/Projects/P3-Data-Analysis-with-R')
+wines <- read.csv('wineQualityWhites.csv')
+```
+
+### Data summary 
+```{r echo=FALSE, message=FALSE, warning=FALSE, Data_summary}
+# Data Summary
+summary(wines)
+```
+
+### Data dimensions
+```{r echo=FALSE, message=FALSE, warning=FALSE, Data_dimensions}
+# Data Dimensions
+dim(wines)
+```
+
+### Feature names
+```{r echo=FALSE, message=FALSE, warning=FALSE, Feature_names}
+# Feature Names
+names(wines)
+```
+
+### Data Structure
+```{r echo=FALSE, message=FALSE, warning=FALSE, Data_structure}
+str(wines)
+```
+
+I found out that the first col X is a unique index variable for each individual 
+observation. I think it is not very useful to the analysis so its best to remove
+it before procceding to the next step.
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+# Selecting only col 2 to col 13, excluding the first col (Line no.)
+wines <- wines[,c(2:13)]
+```
+
+# Univariate Plots Section
+
+### Observation
+We already know that the `quality` of the wine is rated by wine experts from the 
+scale of 0 (very bad) to 10 (very excellent)
+
+The lowest and highest `quality` score given is 3 and 9, with a mean of 5.878
+
+All the attribute provided is decimal values except `quality` which is a 
+integer.
+
+Attributes like `fixed.acidity`, `volatile.acidity`, `citric.acid`, 
+`residual.sugar`, `chlorides`, `free.sulfur.dioxide`, `total.sulfur.dioxide`, 
+`sulphates` have max value that is greater than 75% quantile.
+
+Lets take a look at each properties to get a sense of data distribution.
+
+### Quality
+```{r echo=FALSE, message=FALSE, warning=FALSE, Quality}
+# Since wine quality score is just an integer, we can change quality scores as a factor, so that we can use it later
+wines$quality_as_factor <- factor(wines$quality, 
+                                  levels=c(0,1,2,3,4,5,6,7,8,9,10))
+```
+
+#### Levels attributes of wine quality
+```{r echo=FALSE, message=FALSE, warning=FALSE, Levels_attributes_of_wine_quality}
+levels(wines$quality_as_factor)
+```
+
+#### Summary
+```{r echo=FALSE, message=FALSE, warning=FALSE, summary}
+summary(wines$quality)
+```
+#### Summary of Quality as factor
+```{r echo=FALSE, message=FALSE, warning=FALSE, summary_quality_as_factor}
+summary(wines$quality_as_factor)
+```
+
+#### Mode of Qualiy Score
+```{r echo=FALSE, message=FALSE, warning=FALSE, mode_of_qualiy_score}
+wines_quality_mode <- names(which.max(table(wines$quality)))
+```
+Mode of the quality score is 6. Same as what we saw in summary of 
+`quality_as_factor`.
+
+#### Histogram of Quality
+```{r echo=FALSE, message=FALSE, warning=FALSE, Histogram_of_Quality}
+qplot(x=quality_as_factor, data = wines, binwidth=1, 
+      xlab='Quality', 
+      ylab='Count',
+      color=I('black'), fill=I('#F79420'))
+```
+
+I factor the wine quality from an integer variable to a categorical varible 
+(`quality_as_factor`) as its kind of arbitary and can be represented by another 
+form of values not just integer. The histogram shows the shape of normal 
+distribution. 
+
+The range of possible scores is from 0 to 10, in the dataset the minimum score 
+is 3 and maximum is 9. The mean is 5.878 and the median is 6 which is very close
+to each other.
+
+### Fixed.acidity
+```{r echo=FALSE, message=FALSE, warning=FALSE, fixed_acidity}
+table(wines$fixed.acidity)
+summary(wines$fixed.acidity)
+
+qplot(x=fixed.acidity, data=wines, binwidth=.2, 
+      xlab='Fixed Acidity [g / dm^3]', 
+      ylab='Count',
+      color=I('black'), fill=I('#F79420')) +
+  scale_x_continuous(lim=c(4, 11))
+```
+
+There seems be a right tail when the histogram was initially chartted. Once the
+outlier which is a value 11.8 and 14.2 is removed, the histogram show a normal
+distribution.
+
+### Volatile.acidity
+```{r echo=FALSE, message=FALSE, warning=FALSE, volative_acidity}
+summary(wines$volatile.acidity)
+
+summary(log10(wines$volatile.acidity))
+
+qplot(x=log10(volatile.acidity), data=wines, binwidth=.03,
+      xlab='Volatile Acidity [g / dm^3]', 
+      ylab='Count',
+      color=I('black'), fill=I('#F79420')) 
+```
+
+By transforming the variable using a log based 10, we able to remove the right
+tail and turn it into a normal distribution.
+
+### Citric.acid
+```{r echo=FALSE, message=FALSE, warning=FALSE, citric_acid}
+summary(wines$citric.acid)
+
+qplot(x=citric.acid, data=wines,
+      xlab='Citric Acidity [g / dm^3]', 
+      ylab='Count',
+      color=I('black'), fill=I('#F79420')) +
+  scale_x_continuous(lim=c(0, 1))
+```
+
+Using a box plot, we can cleary visualize the outlier which may cause the
+histogram to have a long right tail. Once we removed that, our histogram shows
+a normal distribution.
+
+### Residual.sugar
+```{r echo=FALSE, message=FALSE, warning=FALSE, residual_sugar}
+summary(wines$residual.sugar)
+
+summary(log10(wines$residual.sugar))
+
+# Removing outlier on the right tail
+qplot(x=residual.sugar, data = wines,
+      xlab='Residual Sugar [g / dm^3]', 
+      ylab='Count',
+      color=I('black'), fill=I('#F79420')) +
+  scale_x_continuous(lim=c(0, 40))
+
+# Transform the variable
+qplot(x=log10(residual.sugar), data = wines,
+      xlab='Residual Sugar [g / dm^3]', 
+      ylab='Count',
+      color=I('black'), fill=I('#F79420'))
+```
+
+I try to remove the outlier after looking at the boxplot. The histogram seems
+to show a positive skewed graph. However, after applying a log based 10
+transformation. This histogram still does not appear to be a normal 
+distribution. It looks more like a bi-model distribution.
+
+### chlorides
+```{r echo=FALSE, message=FALSE, warning=FALSE, chlorides}
+summary(log10(wines$chlorides))
+
+qplot(x=log10(wines$chlorides), data=wines,
+      xlab='Chlorides [g / dm^3]', 
+      ylab='Count',
+      color=I('black'), fill=I('#F79420'))
+```
+
+Chlorides shows a normal distribution once a log based 10 transformation is
+applied.
+
+### free.sulfur.dioxide
+```{r echo=FALSE, message=FALSE, warning=FALSE, free_sulfur_dioxide}
+summary(wines$free.sulfur.dioxide)
+
+qplot(x=free.sulfur.dioxide, data=wines, binwidth=2,
+      xlab='Free Sulfur Dioxide [mg / dm^3]', 
+      ylab='Count',
+      color=I('black'), fill=I('#F79420')) +
+  scale_x_continuous(lim=c(0, 90))
+```
+
+Once outlier is removed, the histogram appears as a normal distribution.
+
+### total.sulfur.dioxide
+```{r echo=FALSE, message=FALSE, warning=FALSE, total_sulfur_dioxide}
+summary(wines$total.sulfur.dioxide)
+
+qplot(x = total.sulfur.dioxide, data = wines, , binwidth=5, 
+      xlab='Total Sulfur Dioxide [mg / dm^3]', 
+      ylab='Count',
+      color=I('black'), fill=I('#F79420')) +
+  scale_x_continuous(lim = c(0, 300))
+```
+
+Same for `total.sulfur.dioxide` once right tail outlier is removed, the 
+histogram appears as a normal distribution.
+
+### pH
+```{r echo=FALSE, message=FALSE, warning=FALSE, ph}
+summary(wines$pH)
+
+qplot(x = pH, data=wines, binwidth = .05,
+      xlab='pH', 
+      ylab='Count',
+      color=I('black'), fill=I('#F79420'))
+```
+
+`pH` seems to give a normal distribution once histogram is graphed. There is no
+transformation that needs to be applied to it.
+
+### sulphates
+```{r echo=FALSE, message=FALSE, warning=FALSE, sulphates}
+summary(wines$sulphates)
+
+qplot(y=sulphates,  x=factor(0), data=wines, geom='boxplot')
+
+summary(log10(wines$sulphates))
+
+qplot(x = log10(sulphates), data=wines, binwidth = .02,
+      xlab='Sulphates [g / dm3]', 
+      ylab='Count',
+      color=I('black'), fill=I('#F79420'))
+```
+
+Applying log based 10 transformation gives us a normal distribution.
+
+### density
+```{r echo=FALSE, message=FALSE, warning=FALSE, density}
+summary(wines$density)
+
+qplot(x = density, data=wines, binwidth=.0005,
+      xlab='Density [g / cm^3]', 
+      ylab='Count',
+      color=I('black'), fill=I('#F79420')) +
+  scale_x_continuous(limits = c(0.98, 1.01), breaks=seq(0.98, 1.01, .005))
+  
+```
+
+The `desity` histogram shows a normal distribution once the outlier is removed.
+
+### alcohol
+```{r echo=FALSE, message=FALSE, warning=FALSE, alcohol}
+summary(wines$alcohol)
+
+tapply(wines$alcohol, wines$quality, mean)
+
+qplot(x = alcohol, data=wines, binwidth=.2, 
+      xlab='Alcohol [%]', 
+      ylab='Count',
+      color=I('black'), fill=I('#F79420')) +
+  scale_x_continuous(limits = c(8, 14.20), breaks=seq(8, 14.20, 1))
+```
+
+This histogram shows a slight positive skewed distribution with a peak between
+9 and 10.
+
+# Univariate Analysis
+
+### What is the structure of your dataset?
+
+There are 4,898 observations and 13 variables in the dataset. First variable X
+is basically an index of each observations. It is being removed as its useless
+for the analysis. The rest of the variables which is stored as numerical data
+type is basically the properties of white wine. Last variable is an integer
+`quality` score which is rated by wine experts from the scale of 0 (very bad)
+to 10 (very excellent). The `quality` score is converted to a factor data types.
+Most of the wines have a `quality` score of 6, the lowest and highest score
+given is 3 and and 9.
+
+### What is/are the main feature(s) of interest in your dataset?
+
+The main feature that is important to this analysis is the wine quality.
+Analysis needs to be done on the wine properties to see whether it has an
+impact to this outcome.
+
+### What other features in the dataset do you think will help support your investigation into your feature(s) of interest?
+
+Lets take a look at how correlated the variables are:
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+cor(x=wines[,1:11],y=wines$quality)
+```
+
+We can see that the following variables are correlated with quallity:
+
+* density (Highly correlated)
+* chlorides (Moderatelly correlated)
+* volatile.acidity 
+* total.sulfur.dioxide
+* fixed.acidity
+* residual.sugar
+* citric.acid
+* free.sulfur.dioxide
+* sulphates
+* pH (Moderatelly correlated)
+* alcohol (Highly correlated)
+
+We will concentrate on the top variables that show strong correlation.
+
+### Did you create any new variables from existing variables in the dataset?
+
+Yes, since we know that the mode of quality score is 6. We would consider the
+average is 6 in a 0 to 10 scale. We can define a cut in the scores. 
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+wines$quality_cut <- cut(wines$quality, breaks=c(0,5,6,10))
+
+table(wines$quality_cut)
+```
+
+So we will have three groups of wines score after the cut. First group has a
+quality score from 0 to 5, which we can consider the bad quality group. Then
+the second group which has a score of 6 average quality group and lastly the 7
+to 10 quality score group is the best quality group. We will these groups in our
+analysis.
+
+### Of the features you investigated, were there any unusual distributions? Did you perform any operations on the data to tidy, adjust, or change the form of the data? If so, why did you do this?
+
+I created a few histograms to understand the distribution of the features and
+box plots to find out the outliers. Yes, there were a few outliers in the
+features in which I removed to get it to look gaussian or normal distribution. I
+also applied a log based 10 transformation on the features which had long tails
+so that the features becomes gaussian. `quality`and `pH` were the features which
+I did not apply any transformations as they look like normal distribution.
+Alcohol feature looks like a positive skewed distribution.
+
+# Bivariate Plots Section
+
+```{r echo=FALSE, message=FALSE, warning=FALSE, Bivariate_Plots_Section}
+#set.seed(3000)
+#ggpairs(wines[sample.int(nrow(wines), 1500),])
+```
+
+I decided to plot out ggpairs scatterplot matrix to have a look into the
+relationships between the variables. I found out that the 4 most correclated
+variables with quality were alcohol, ph, chlorides, density. But lets plot all
+other variables as well.
+
+### Boxplot of Quality vs all Other variable
+
+```{r echo=FALSE, message=FALSE, warning=FALSE, Boxplot_of_Quality_vs_all_Other_variable, fig.width=13, fig.height=10}
+p1 <- ggplot(aes(x = quality_as_factor, y = alcohol), data = wines) +
+      geom_boxplot() +
+      geom_hline(show_guide=T, yintercept=mean(wines$alcohol),
+                 linetype='longdash', alpha=.5, color='blue') +
+      xlab("Quality") +
+      ylab("Alcohol [%]") +
+      ggtitle('Quality vs Alcohol [%]')
+
+p2 <- ggplot(aes(x = quality_as_factor, y = density), data = wines) +
+      geom_boxplot() +
+      geom_hline(show_guide=T, yintercept=mean(wines$density),
+                 linetype='longdash', alpha=.5, color='blue') +
+      ylim(c(0.98, 1.01)) +
+      xlab("Quality") +
+      ylab("Density [g / cm^3]") +
+      ggtitle("Quality vs Density [g / cm^3]")
+
+p3 <- ggplot(aes(x = quality_as_factor, y = log10(chlorides)), data = wines) +
+      geom_boxplot() +
+      geom_hline(show_guide=T, yintercept=mean(log10(wines$chlorides)),
+                 linetype='longdash', alpha=.5, color='blue') +
+      xlab("Quality") +
+      ylab("log10 Chlorides [g / dm^3]") +
+      ggtitle("Quality vs log10 Chlorides [g / dm^3]")
+
+p4 <- ggplot(aes(x = quality_as_factor, y = log10(volatile.acidity)),
+             data = wines) +
+      geom_boxplot() +
+      geom_hline(show_guide=T, yintercept=mean(log10(wines$volatile.acidity)),
+                 linetype='longdash', alpha=.5, color='blue') +
+      xlab("Quality") +
+      ylab("log10 Volatile.acidity [g / dm^3]") +
+      ggtitle('Quality vs log10 Volatile.acidity [g / dm^3]')
+
+p5 <- ggplot(aes(x = quality_as_factor, y = total.sulfur.dioxide),
+             data = wines) +
+      geom_boxplot() +
+      geom_hline(show_guide=T, yintercept=mean(wines$total.sulfur.dioxide),
+                 linetype='longdash', alpha=.5, color='blue') +
+      ylim(c(0, 300)) + 
+      xlab("Quality") +
+      ylab("Total.sulfur.dioxide [mg / dm^3]") +
+      ggtitle('Quality vs Total.sulfur.dioxide [mg / dm^3]')
+
+p6 <- ggplot(aes(x = quality_as_factor, y = fixed.acidity), data = wines) +
+      geom_boxplot() +
+      geom_hline(show_guide=T, yintercept=mean(wines$fixed.acidity),
+                 linetype='longdash', alpha=.5, color='blue') +
+      ylim(c(4, 11)) +
+      xlab("Quality") +
+      ylab("Fixed.acidity [g / dm^3]") +
+      ggtitle('Quality vs Fixed.acidity [g / dm^3]')
+
+p7 <- ggplot(aes(x = quality_as_factor, y = log10(residual.sugar)),
+             data = wines) +
+      geom_boxplot() +
+      geom_hline(show_guide=T, yintercept=mean(log10(wines$residual.sugar)),
+                 linetype='longdash', alpha=.5, color='blue') +
+      xlab("Quality") +
+      ylab("log10 Residual.sugar [g / dm^3]") +
+      ggtitle("Quality vs log10 Residual.sugar [g / dm^3]")
+
+p8 <- ggplot(aes(x = quality_as_factor, y = citric.acid), data = wines) +
+      geom_boxplot() +
+      geom_hline(show_guide=T, yintercept=mean(wines$citric.acid),
+                 linetype='longdash', alpha=.5, color='blue') +
+      ylim(c(0, 1)) +
+      xlab("Quality") +
+      ylab("Citric.acid [g / dm^3]") +
+      ggtitle("Quality vs Citric.acid [g / dm^3]")
+
+p9 <- ggplot(aes(x = quality_as_factor, y = free.sulfur.dioxide), 
+             data = wines) +
+      geom_boxplot() +
+      geom_hline(show_guide=T, yintercept=mean(wines$free.sulfur.dioxide), 
+                 linetype='longdash', alpha=.5, color='blue') +
+      ylim(c(0, 90)) +
+      xlab("Quality") +
+      ylab("Free.sulfur.dioxide [mg / dm^3]") +
+      ggtitle("Quality vs Free.sulfur.dioxide [mg / dm^3]")
+
+p10 <- ggplot(aes(x = quality_as_factor, y = log10(sulphates)), data = wines) +
+      geom_boxplot() +
+      geom_hline(show_guide=T, yintercept=mean(log10(wines$sulphates)), 
+                 linetype='longdash', alpha=.5, color='blue') +
+      xlab("Quality") +
+      ylab("log10 Sulphates [g / dm3]") +
+      ggtitle("Quality vs log10 Sulphates [g / dm3]")
+
+p11 <- ggplot(aes(x = quality_as_factor, y = pH), data = wines) +
+      geom_boxplot() +
+      geom_hline(show_guide=T, yintercept=mean(wines$pH), linetype='longdash', 
+                 alpha=.5, color='blue') +
+      xlab("Quality") +
+      ylab("pH") +
+      ggtitle('Quality vs pH')
+
+grid.arrange(p1,p2,p3,p4,p5,p6,p7,p8,p9,p10,p11, ncol = 4)
+```
+
+### Mean and average mean of top 4 correlated variables
+
+#### Mean and average mean of Alcohol
+```{r echo=FALSE, message=FALSE, warning=FALSE, Mean_and_average_mean_of_alcohol}
+
+mean(wines$alcohol)
+
+tapply(wines$alcohol, wines$quality, mean)
+```
+
+#### Mean and average mean of pH
+```{r echo=FALSE, message=FALSE, warning=FALSE, Mean_and_average_mean_of_pH}
+mean(wines$pH)
+
+tapply(wines$pH, wines$quality, mean)
+```
+
+#### Mean and average mean of density
+```{r echo=FALSE, message=FALSE, warning=FALSE, Mean_and_average_mean_of_density}
+mean(wines$density)
+
+tapply(wines$density, wines$quality, mean)
+```
+
+#### Mean and average mean of chlorides
+```{r echo=FALSE, message=FALSE, warning=FALSE, Mean_and_average_mean_of_chlorides}
+mean(wines$chlorides)
+
+tapply(wines$chlorides, wines$quality, mean)
+
+```
+
+From the boxplot above, we were able to understand more about the relationship
+between `quality` and other variables. In the `alcohol` vs `quality` plot, we 
+can clearly see that as the `quality` increases as `alcohol` varies. It has a 
+mean of 10.514 and the mean increases as the quality score is above 5. Same goes
+with `pH`. It `pH` mean values starts to increase when is above 5. `density` and
+`chlorides` on the other hand shows a negative influence to `quality` score. Its
+means are 0.994 and 0.046 for `density` and `chlorides`, both average means
+decreases as the quality score is above 5.
+
+We can verify this using a scatter plot.
+
+### Quality vs Alcohol and Quality vs pH
+
+```{r echo=FALSE, message=FALSE, warning=FALSE, Quality_vs_Alcohol_and_Quality_vs_pH}
+p12 <- ggplot(aes(x = quality, y = alcohol), data = wines) + 
+      geom_jitter(alpha=1/5) +
+      geom_smooth(method='lm') +    
+      xlab("Quality") +
+      ylab("Alcohol [%]")
+
+p13 <- ggplot(aes(x = quality, y = pH), data = wines) + 
+      geom_jitter(alpha=1/5) +
+      geom_smooth(method='lm') +
+      xlab("Quality") +
+      ylab("pH")
+
+grid.arrange(p12,p13, ncol = 1)
+```
+
+### Quality vs Density and Quality vs Chlorides
+
+```{r echo=FALSE, message=FALSE, warning=FALSE, Quality_vs_Density_and_Quality_vs_Chlorides}
+p14 <- ggplot(aes(x = quality_as_factor, y = density), data = wines) + 
+      geom_jitter(alpha=1/5) +
+      ylim(c(0.98, 1.01)) +      
+      geom_smooth(method='lm') +
+      xlab("Quality") +
+      ylab("Density [g / cm^3]")
+
+p15 <- ggplot(aes(x = quality, y = log10(chlorides)), data = wines) + 
+      geom_jitter(alpha=1/5) +
+      geom_smooth(method='lm') +
+      xlab("Quality") +
+      ylab("Chlorides [g / dm^3]")
+
+grid.arrange(p14,p15, ncol = 1)
+```
+
+We already see a tendency in the boxplot, this can be better illustrate with a
+scatter plot and a linear regression line in it. Good wines tends to have higher
+alcohol level and higher pH.  
+
+We explore further to find out the influence of main features with other
+secondary features.
+
+### Alcohol vs Other Features
+
+```{r echo=FALSE, message=FALSE, warning=FALSE, Alcohol_vs_Other_Features}
+
+p16 <- ggplot(aes(x = alcohol, y = pH), data = wines) + 
+       geom_jitter(alpha=1/5) +
+       geom_smooth(method='lm') + 
+       ggtitle("pH vs Alcohol") +
+       xlab("Alcohol [%]") +
+       ylab("pH")
+
+p17 <- ggplot(aes(x = alcohol, y = density), data = wines) + 
+       geom_jitter(alpha=1/5) +
+       geom_smooth(method='lm') +
+       ylim(c(0.985, 1.005)) +  
+       ggtitle("Density [g / cm^3] vs Alcohol [%]") +
+       xlab("Alcohol [%]") +
+       ylab("Density [g / cm^3]")
+
+p18 <- ggplot(aes(x = alcohol, y = log10(residual.sugar)), data = wines) + 
+       geom_point(alpha = 1/5) +         
+       geom_smooth(method = 'lm') + 
+       ggtitle('Log10 Residual Sugar [g / dm^3] vs Alcohol [%]') +
+       xlab("Alcohol [%]") +
+       ylab("Log10 Residual Sugar [g / dm^3]")
+
+p19 <- ggplot(aes(x = alcohol, y = log10(chlorides)), data = wines) + 
+       geom_point(alpha = 1/5) +       
+       geom_smooth(method = 'lm') +
+       ggtitle('Log10 Chlorides [g / dm^3] vs Alcohol [%]') +
+       xlab("Alcohol [%]") +
+       ylab("Log10 Chlorides [g / dm^3]")
+
+p20 <- ggplot(aes(x = alcohol, y = total.sulfur.dioxide), data = wines) +
+       ylim(c(0, 300)) +
+       geom_point(alpha = 1/5) +       
+       geom_smooth(method = 'lm') +
+       ggtitle('Total.sulfur.dioxide [mg / dm^3] vs Alcohol [%]') +
+       xlab("Alcohol [%]") +
+       ylab("Total.sulfur.dioxide")
+
+p21 <- ggplot(aes(x = alcohol, y = free.sulfur.dioxide), data = wines) +
+       ylim(c(0, 90)) +
+       geom_point(alpha = 1/5) +       
+       geom_smooth(method = 'lm') +
+       ggtitle('Free.sulfur.dioxide [mg / dm^3] vs Alcohol [%]') +
+       xlab("Alcohol [%]") +
+       ylab("Free.sulfur.dioxide [mg / dm^3]")
+
+grid.arrange(p16,p17,p18,p19,p20,p21, ncol = 2)
+```
+
+We can see negative influence of these variables `density`, `residual.sugar`,
+`chlorides`, `total.sulfur.dioxide`, `free.sulfur.dioxide` in `alcohol` level.
+Only `pH` shows a positive correlation.
+
+### pH vs fixed.acidity and pH vs residual sugar
+
+```{r echo=FALSE, message=FALSE, warning=FALSE, pH_vs_fixed.acidity_and_pH_vs_residual_sugar}
+ggplot(aes(x = pH, y = fixed.acidity), data = wines) + 
+  geom_jitter(alpha=1/5) + 
+  geom_smooth(method = 'lm') + 
+  ylim(c(3.8, 11)) +
+  ggtitle('fixed.acidity [g / dm^3] vs pH') +
+  xlab("pH") +
+  ylab("fixed.acidity [g / dm^3]")
+
+cor(wines$pH, wines$fixed.acidity)
+
+ggplot(aes(x = pH, y = residual.sugar), data = wines) + 
+  geom_jitter(alpha=1/5) + geom_smooth(method = 'lm') + 
+  ylim(c(0, 20)) + 
+  scale_y_log10() +
+  ggtitle('log 10 Residual Sugar [g / dm^3] vs pH') +
+  xlab("pH") +
+  ylab("log 10 Residual Sugar [g / dm^3]")
+
+cor.test(wines$pH, wines$residual.sugar)
+```
+
+I certainly would expect `fixed.acidity` to be correlated to `pH`. In chemistry
+when `acidity` goes down, the `pH` value should goes up as well. There's no
+clear pattern on `residual.sugar` and `pH`, even though they are negative
+correlated.
+
+### free.sulfur.dioxide vs total.sulfur.dioxide
+
+```{r echo=FALSE, message=FALSE, warning=FALSE, free.sulfur.dioxide_vs_total.sulfur.dioxide}
+ggplot(aes(x = free.sulfur.dioxide, y = total.sulfur.dioxide), 
+           data = subset(wines, 
+                  free.sulfur.dioxide<quantile(wines$free.sulfur.dioxide,.99) & 
+                  total.sulfur.dioxide<quantile(wines$total.sulfur.dioxide,.99))) +
+  geom_point(alpha = 1/5) +
+  geom_smooth(method='lm') +
+  ggtitle('total.sulfur.dioxide [mg / dm^3] vs free.sulfur.dioxide [mg / dm^3]') +
+  xlab("total.sulfur.dioxide [mg / dm^3]") +
+  ylab("free.sulfur.dioxide [mg / dm^3]")
+
+cor.test(wines$free.sulfur.dioxide, wines$total.sulfur.dioxide,
+         method='pearson')
+```
+
+Besides main feature and secondary feature. Other features such as
+`free.sulfur.dioxide` and `total.sulfur.dioxide` are correlated to one another. 
+
+### Residual Sugar vs Density
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+ggplot(aes(x = density, y = residual.sugar), 
+       data = subset(wines, residual.sugar<quantile(wines$residual.sugar,.99) & 
+                    density<quantile(density,.99))) +
+        geom_point(alpha = 1/5) +       
+        geom_smooth(method = 'lm') + 
+        ggtitle('log 10 Residual Sugar [g / dm^3] vs Density [g / cm^3]') +
+        xlab("Density [g / cm^3]") +
+        ylab("log 10 Residual Sugar [g / dm^3]") +
+        scale_y_log10()
+ 
+cor.test(wines$density, wines$residual.sugar, method='pearson')
+```
+
+When top 1% of observations is excluded and plotting both of these two variables
+`residual.sugar` and `density` together shows a strong correlation.
+
+# Bivariate Analysis
+
+### Talk about some of the relationships you observed in this part of the investigation. How did the feature(s) of interest vary with other features in the dataset?
+
+Since our main goal was to find out what features affects `quality` score. The
+main relationship observed was `alcohol` and `quality`, `pH` and `quality`.
+Besides that `density` and `chlorides` have negative influence on `qualty`. 
+
+### Did you observe any interesting relationships between the other features (not the main feature(s) of interest)?
+
+The other features which shows interesting relationship was free.sulfur.dioxide
+and total.sulfur.dioxide with a correlation of 0.616. Both are correlated to one
+another as both are free and bound forms of sulfur dioxide gas (S02).
+
+### What was the strongest relationship you found?
+
+The strongest relationship found was density and residual.sugar with a
+correlation of 0.828.
+
+# Multivariate Plots Section
+
+### Residual Sugar vs Density vs Alcohol
+```{r echo=FALSE, message=FALSE, warning=FALSE, Residual_Sugar_vs_Density_vs_Alcohol}
+ggplot(aes(x = density, y = residual.sugar), 
+       data = subset(wines, residual.sugar<quantile(wines$residual.sugar,.99) & 
+                  density<quantile(density,.99))) +
+  geom_point(aes(color = alcohol)) + 
+  geom_vline(xintercept = mean(wines$density), linetype='longdash',
+             color='blue', alpha=.5) +
+  geom_hline(yintercept = mean(wines$residual.sugar), linetype='longdash',
+             color='blue', alpha=.5) +
+  ggtitle('Residual Sugar [g / dm^3] vs Density [g / cm^3] vs Alcohol [%]') +
+  xlab("Density [g / cm^3]") +
+  ylab("Residual Sugar [g / dm^3]")
+
+```
+
+Since we found out that `density` and `residual.sugar` has the strongest
+relationship. I explored more with `alcohol`. From the plot it appears that as
+`density` and `residual.sugar` increases the `alcohol` color seems to turn
+darker which means `alcohol` decreses.
+
+### Residual Sugar vs Density vs Quality Cut
+```{r echo=FALSE, message=FALSE, warning=FALSE, Residual_Sugar_vs_Density_vs_Quality_Cut}
+ggplot(aes(x = density, y = residual.sugar), 
+       data = subset(wines, residual.sugar<quantile(wines$residual.sugar,.99) & 
+                  density<quantile(density,.99))) +
+        geom_jitter(alpha=.5, aes(color=quality_cut)) +
+        geom_vline(xintercept = mean(wines$density), linetype='longdash', 
+                   color='blue', alpha=.5) +
+        geom_hline(yintercept = mean(wines$residual.sugar), 
+                   linetype='longdash',
+                   color='blue', alpha=.5) +
+        guides(size=guide_legend(title="Quality Cut"),
+               color=guide_legend(title="Quality Cut")) +
+        ggtitle('Residual Sugar [g / dm^3] vs Density [g / cm^3]') +
+        xlab("Density [g / cm^3]") +
+        ylab("Residual Sugar [g / dm^3]")
+```
+
+When I swapped out alcohol with my defined new variable `quality` cut. The
+result were more obvious. We can see that better quality score wines are
+concentrated on the left hand side of the plot where as bad quality score wines
+are on the right.
+
+### pH vs fixed.acidiy vs Quality
+
+```{r echo=FALSE, message=FALSE, warning=FALSE, pH_vs_fixed.acidiy_vs_Quality}
+ggplot(aes(x = pH, y = fixed.acidity), data = wines) + 
+  geom_jitter(alpha=.3, aes(color=quality_as_factor)) + 
+  guides(color=guide_legend(title="Quality")) +
+  xlab("pH") +
+  ylab("fixed.acidity [g / dm^3]") +
+  ggtitle('pH vs Fixed.acidity [g / dm^3] vs Quality')
+
+ggplot(aes(x = pH, y = fixed.acidity), data = wines) + 
+  geom_jitter(alpha=.3, aes(color=quality_cut)) + 
+  guides(color=guide_legend(title="Quality")) +
+  xlab("pH") +
+  ylab("fixed.acidity [g / dm^3]") +
+  ggtitle('pH vs Fixed.acidity [g / dm^3] vs Quality Cut')
+
+ggplot(aes(x = pH, y = fixed.acidity, color=quality_as_factor), data = wines) + 
+  geom_jitter(alpha=.3) +
+  facet_wrap(~quality_cut) +
+  guides(color=guide_legend(title="Quality")) +
+  xlab("pH") +
+  ylab("fixed.acidity [g / dm^3]") +
+  ggtitle('pH vs Fixed.acidity [g / dm^3] vs Quality')
+
+```
+
+Initially, I thought `pH` has a little bit of correlation with `quality`. Thus
+`pH` vs `fixed.acidity` should somewhat linked with `quality`. After plotting it
+out there seems no strong pattern that we can identify from `pH` vs 
+`fixed.acidity` vs `quality`.
+
+# Multivariate Analysis
+
+### Talk about some of the relationships you observed in this part of the investigation. Were there features that strengthened each other in terms of looking at your feature(s) of interest?
+
+The relationship between `density` and `residual.sugar` and `alcohol` seems
+quite interesting. Since all of them are highly correlated with one another, it
+is easy to spot the changes as any one of the variable varies. When we swapped
+out `alcohol` with `quality` score the same correlation can be spotted as well.
+
+### Were there any interesting or surprising interactions between features?
+
+As I mentioned above, I thought `pH` would provide some interaction with
+`quality`. But after plotting it out. It's a bit hard to identify it from the
+plot.
+
+### OPTIONAL: Did you create any models with your dataset? Discuss the strengths and limitations of your model.
+
+No.
+------
+
+# Final Plots and Summary
+
+### Plot One 
+```{r echo=FALSE, message=FALSE, warning=FALSE, Plot_One}
+ggplot(aes(x=alcohol), data = wines) +
+  geom_histogram(binwidth = 0.15, color = I('black'), fill = I('#F79420')) +
+  facet_wrap(~quality_cut) +  
+  geom_vline(xintercept = mean(wines$alcohol), linetype='longdash',
+             color='blue', alpha=.5) +
+  scale_x_continuous(limits = c(8,14), breaks = seq(8,14,1)) +
+  xlab("Alcohol [%]") +
+  ylab("Count") +
+  ggtitle("Histogram for Alcohol [%]")
+```
+
+### Description One
+
+When the histogram is facet by quality score cut. We can see that bad quality
+score wines show a positive skewed towards lower alcohol level. Average quality
+score wines shows us more of a shape of normal distribution of alcohol. Best
+quality score shows a negatively skewed distribution towards higher alcohol
+level.  
+
+### Plot Two
+```{r echo=FALSE, message=FALSE, warning=FALSE, Plot_Two}
+ggplot(aes(x = density, y = residual.sugar), 
+       data = subset(wines, residual.sugar<quantile(wines$residual.sugar,.99) & 
+                  density<quantile(density,.99))) +
+  geom_point(aes(color = alcohol)) + 
+  facet_wrap(~quality_cut) +
+  geom_vline(xintercept = mean(wines$density), linetype='longdash',
+             color='blue', alpha=.5) +
+  geom_hline(yintercept = mean(wines$residual.sugar), linetype='longdash',
+             color='blue', alpha=.5) +
+  ggtitle('Log 10 Residual Sugar [g / dm^3] vs Density [g / cm^3] vs Alcohol %') +
+  xlab("Density [g / cm^3]") +
+  ylab("Log 10 Residual Sugar [g / dm^3]") +
+  scale_y_log10()
+
+```
+
+### Description Two
+
+This graph shows that as `density` and `residual sugar` increase, `alcohol`
+level decreases. This can be clearly seen in best quality score wines where the
+color goes from light to dark. Even thought the same color variation applies to
+average quality score wines and bad quality score wines but its not that
+significant.
+
+### Plot Three
+```{r echo=FALSE, message=FALSE, warning=FALSE, Plot_Three}
+
+ggplot(data=wines, aes(x=alcohol, y=density, color=quality_as_factor)) +
+    coord_cartesian(
+        xlim=c(quantile(wines$alcohol,.01),quantile(wines$alcohol,.99)),
+        ylim=c(quantile(wines$density,.01),quantile(wines$density,.99))
+        ) +
+    facet_wrap(~quality_cut) + 
+    guides(color=guide_legend(title="Quality")) +
+    geom_point() +
+    geom_vline(xintercept = mean(wines$alcohol), linetype='longdash', 
+               color='blue', alpha=.5) +
+    geom_hline(yintercept = mean(wines$density), linetype='longdash', 
+               color='blue', alpha=.5) +  
+    xlab("Alcohol [%]") +
+    ylab("Density [g / cm^3]") +    
+    ggtitle('Alcohol [%] vs Density [g / cm^3] vs Quality')
+```
+
+### Description Three
+
+In this graph, using the newly defined variable cut of quality score. We can see that best wines quality score (8~10) concentrate in the lower right quadrant. That is when density is low and alcohol level is high. For bad quality score wines (0~5), its concentrated in the upper left quadrant with high density and low alcohol level.   
+
+------
+
+# Reflection
+
+There are two difficulties which I encountered during the analaysis. One, the
+lack of categorical variables. In the dataset there is only one categorical
+variable that we can use which is `quality`, I wish that there were more
+variables like that as it would allow us to identify more relationship between
+the variables using subset. Two, the lack of correlations between variables.
+There are some variables that shows very low correlation with any other
+variables.
+
+Even with the limitation that we had in our dataset, we are still able to
+discover very interesting findings such as `alcohol` and `density` and
+`residual.sugar`. I was only able to identify a few of them to understand its
+influvence over `quality` score from a scatterplot matrix.
+
+There are many other factors that can determine a good wine. Things like smells
+and flavours and not chemical properties can be documented in the dataset to
+allow us to explore further to find out what is a good quality wines.
